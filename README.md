@@ -5,7 +5,7 @@ Last updates:
 3) Add Natives: Game_IsVoteInProgress() and BuiltinVote_IsVoteInProgress(). 
 4) Fix native IsBuiltinVoteInProgress(), also checks if the game voting is in progress at the moment. This blocks double voting without plugin updates (Block if the game vote is already in progress).
 5) Add Native Game_GetVoteTeam() for game left4dead2.
-6) Сompile with latest SourceMod 1.10.
+6) Infinite voting fix: if there is an wrong code in the plugin and the sourcemod interrupts the execution of the code or the plugin author forgot to add DisplayVoteFail or DisplayVotePass, then the voting table will be endlessly shown to the players. Now the extension will do it on its own and send the players that the vote failed. The fix is primarily made for the game left4dead2.
 
 BuiltinVotes by Powerlord
 ==============

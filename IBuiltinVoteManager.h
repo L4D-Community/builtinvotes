@@ -481,6 +481,13 @@ namespace SourceMod
 		 * @return				Approximate number of bytes being used.
 		 */
 		virtual unsigned int GetApproxMemUsage() =0;
+		
+		/**
+		 * @brief The players were shown the table of voting results
+		 *
+		 * @return				True if shown otherwise false.
+		 */
+		virtual bool IsResultDisplayed() =0;
 	};
 
 

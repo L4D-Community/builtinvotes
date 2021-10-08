@@ -547,3 +547,8 @@ bool CBaseBuiltinVote::Display(int client)
 
 	return Display(clients, 1);
 }
+
+bool CBaseBuiltinVote::IsResultDisplayed()
+{
+	return m_bResultDisplayed;
+}

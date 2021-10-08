@@ -141,7 +141,6 @@ bool CL4D1BuiltinVote::Display(int clients[], unsigned int num_clients)
 
 	}
 
-
 	IGameEvent *startEvent = events->CreateEvent("vote_started");
 	startEvent->SetInt("team", m_team);
 	startEvent->SetInt("initiator", m_initiator);
@@ -238,7 +237,6 @@ void CL4D1BuiltinVote::DisplayVoteFail(BuiltinVoteFailReason reason)
 	IGameEvent *failEvent = events->CreateEvent("vote_failed");
 	failEvent->SetInt("team", m_team);
 	events->FireEvent(failEvent);
-
 }
 
 void CL4D1BuiltinVote::DisplayVoteFail(int client, BuiltinVoteFailReason reason)
@@ -272,6 +270,5 @@ void CL4D1BuiltinVote::ClientSelectedItem(int client, unsigned int item)
 			castEvent->SetInt("entityid", m_initiator);
 			events->FireEvent(castEvent);
 		}
-
 	}
 }

@@ -116,6 +116,11 @@ void CBuiltinVoteHandler::OnVoteSelect(IBaseBuiltinVote *vote, int client, unsig
 
 void CBuiltinVoteHandler::OnVoteEnd(IBaseBuiltinVote *vote, BuiltinVoteEndReason reason)
 {
+	if (!vote->IsResultDisplayed())
+	{
+		vote->DisplayVoteFail(BuiltinVoteFail_Generic);
+	}
+
 	DoAction(vote, BuiltinVoteAction_End, reason, 0);
 }
 

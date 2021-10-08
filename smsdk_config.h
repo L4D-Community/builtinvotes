@@ -40,7 +40,7 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"Builtin Votes"
 #define SMEXT_CONF_DESCRIPTION	"API to do votes using the L4D, L4D2, and Orange Box Valve game in-game vote interface"
-#define SMEXT_CONF_VERSION		"0.6.4"
+#define SMEXT_CONF_VERSION		"0.6.5"
 #define SMEXT_CONF_AUTHOR		"Powerlord, A1m`"
 #define SMEXT_CONF_URL			"https://forums.alliedmods.net/showthread.php?t=162164"
 #define SMEXT_CONF_LOGTAG		"BVOTE"
@@ -56,7 +56,7 @@
  * @brief Sets whether or not this plugin required Metamod.
  * NOTE: Uncomment to enable, comment to disable.
  */
-#define SMEXT_CONF_METAMOD		
+#define SMEXT_CONF_METAMOD
 
 /** Enable interfaces you want to use here by uncommenting lines */
 #define SMEXT_ENABLE_FORWARDSYS
