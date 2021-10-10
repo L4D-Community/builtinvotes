@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -73,7 +73,7 @@ void OnVoteDelayChange(IConVar *cvar, const char *value, float flOldValue)
 /* Wrapper for translator->FormatString for error handling.
  * Adapted from SourceMod Translator.cpp's CoreTranslate.
  */
-bool Translate(char *buffer, 
+bool Translate(char *buffer,
 			   size_t maxlength,
 			   const char *format,
 			   unsigned int numparams,
@@ -99,7 +99,7 @@ bool Translate(char *buffer,
 	va_end(ap);
 
 	if (!corePhrases->FormatString(buffer,
-		maxlength, 
+		maxlength,
 		format,
 		params,
 		numparams,
@@ -277,7 +277,7 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 		{
 			continue;
 		}
-		
+
 		m_ClientVotes[clients[i]] = VOTE_PENDING;
 		clientCount++;
 		// NOTE: Good idea would be to send the vote message out just once
@@ -588,11 +588,11 @@ void BuiltinVoteHandler::OnVoteSelect(IBaseBuiltinVote *vote, int client, unsign
 				static char buffer[1024];
 				const char *choice;
 				choice = vote->GetItemDisplay(item);
-			
+
 				if (sm_vote_console->GetBool())
 				{
 					int target = SOURCEMOD_SERVER_LANGUAGE;
-					
+
 #ifdef _DEBUG
 					smutils->LogMessage(myself, "Sending vote cast to server console.");
 #endif
@@ -658,7 +658,7 @@ void BuiltinVoteHandler::InternalReset()
 	m_bCancelled = false;
 	m_pHandler = NULL;
 	m_leaderList[0] = '\0';
-	
+
 	m_TotalClients = 0;
 
 	if (m_displayTimer)
@@ -712,7 +712,7 @@ void BuiltinVoteHandler::DrawHintProgress()
 	}
 
 	int iTimeRemaining = RoundFloatToInt(timeRemaining);
-	
+
 	int maxclients = playerhelpers->GetMaxClients();
 	for (int i=1; i<=maxclients; i++)
 	{

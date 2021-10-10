@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -123,7 +123,7 @@ cell_t BuiltinVote_IsVoteInProgress(IPluginContext *pContext, const cell_t *para
 cell_t Game_IsVoteInProgress(IPluginContext *pContext, const cell_t *params);
 cell_t Game_GetVoteTeam(IPluginContext *pContext, const cell_t *params);
 
-const sp_nativeinfo_t g_Natives[] = 
+const sp_nativeinfo_t g_Natives[] =
 {
 	{"CreateBuiltinVote",				CreateBuiltinVote},
 	{"DisplayBuiltinVote",				DisplayBuiltinVote},

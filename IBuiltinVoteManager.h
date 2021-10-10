@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -77,7 +77,7 @@ namespace SourceMod
 		{
 			unsigned int item;			/**< Item index */
 			unsigned int count;			/**< Number of votes */
-		} *item_list;					/**< Array of size num_items, sorted by count, 
+		} *item_list;					/**< Array of size num_items, sorted by count,
 											 descending */
 	};
 
@@ -248,8 +248,8 @@ namespace SourceMod
 		virtual bool AppendItem(const char *info, const char *display=0) =0;
 
 		/**
-		 * @brief Inserts an item into the vote before a certain position; 
-		 * the new item will be at the given position and all next items 
+		 * @brief Inserts an item into the vote before a certain position;
+		 * the new item will be at the given position and all next items
 		 * pushed forward.
 		 *
 		 * @param position		Position, starting from 0.
@@ -397,7 +397,7 @@ namespace SourceMod
 		 * @return				Handle_t handle value.
 		 */
 		virtual Handle_t GetHandle() =0;
-		
+
 		/**
 		 * @brief Returns vote option flags.
 		 *
@@ -452,7 +452,7 @@ namespace SourceMod
 
 		/**
 		 * @brief The client chose an item. Game-specific logic.
-		 * 
+		 *
 		 * @param client		Client who cast the vote
 		 * @param item			The item they chose
 		 */
@@ -481,7 +481,7 @@ namespace SourceMod
 		 * @return				Approximate number of bytes being used.
 		 */
 		virtual unsigned int GetApproxMemUsage() =0;
-		
+
 		/**
 		 * @brief The players were shown the table of voting results
 		 *
@@ -535,7 +535,7 @@ namespace SourceMod
 		}
 
 		/**
-		 * @brief Called when a vote has been started and displayed to 
+		 * @brief Called when a vote has been started and displayed to
 		 * clients.  This is called after OnVoteStart() and OnVoteDisplay(),
 		 * but before OnVoteSelect().
 		 *
@@ -546,10 +546,10 @@ namespace SourceMod
 		}
 
 		/**
-		 * @brief Called when a vote ends.  This is automatically called by the 
-		 * wrapper, and never needs to called from a style implementation.  
+		 * @brief Called when a vote ends.  This is automatically called by the
+		 * wrapper, and never needs to called from a style implementation.
 		 *
-		 * This function does not replace OnVoteEnd(), nor does it have the 
+		 * This function does not replace OnVoteEnd(), nor does it have the
 		 * same meaning as OnVoteEnd(), meaning you should not destroy a vote
 		 * while it is in this function.
 		 *
@@ -561,8 +561,8 @@ namespace SourceMod
 		}
 
 		/**
-		 * @brief Called when a vote is cancelled.  If this is called, then 
-		 * OnVoteResults() will not be called.  In both cases, OnVoteEnd will 
+		 * @brief Called when a vote is cancelled.  If this is called, then
+		 * OnVoteResults() will not be called.  In both cases, OnVoteEnd will
 		 * always be called.
 		 *
 		 * @param vote			Vote pointer.
@@ -628,7 +628,7 @@ namespace SourceMod
 		virtual void CancelVoting() =0;
 
 		/**
-		 * @brief Returns the remaining vote delay from the last menu.  This delay is 
+		 * @brief Returns the remaining vote delay from the last menu.  This delay is
 		 * a suggestion for all public votes, and is not enforced.
 		 *
 		 * @return				Number of seconds to wait.
@@ -636,7 +636,7 @@ namespace SourceMod
 		virtual unsigned int GetRemainingVoteDelay() =0;
 
 		/**
-		 * @brief Returns whether a client is in the "allowed to vote" pool determined 
+		 * @brief Returns whether a client is in the "allowed to vote" pool determined
 		 * by the initial call to StartVote().
 		 *
 		 * @param client		Client index.

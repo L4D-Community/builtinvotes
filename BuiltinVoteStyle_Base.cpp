@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -276,7 +276,7 @@ m_bWillFreeHandle(false), m_hHandle(BAD_HANDLE), m_pHandler(pHandler), m_voteTyp
 		m_items.push_back(noItem);
 
 		CItem yesItem;
-		
+
 		yesItem.infoString = m_Strings.AddString("Yes");
 		yesItem.displayString = m_Strings.AddString("Yes");
 		m_items.push_back(yesItem);
@@ -305,7 +305,7 @@ bool CBaseBuiltinVote::AppendItem(const char *info, const char *display)
 	}
 
 	CItem item;
-	
+
 	item.infoString = m_Strings.AddString(info);
 	if (display)
 	{
@@ -324,7 +324,7 @@ bool CBaseBuiltinVote::InsertItem(unsigned int position, const char *info, const
 	}
 
 	CItem item;
-	
+
 	item.infoString = m_Strings.AddString(info);
 	if (display)
 	{
@@ -333,7 +333,7 @@ bool CBaseBuiltinVote::InsertItem(unsigned int position, const char *info, const
 	CVector<CItem>::iterator iter = m_items.iterAt(position);
 	m_items.insert(iter, item);
 
-	return true;	
+	return true;
 }
 
 bool CBaseBuiltinVote::RemoveItem(unsigned int position)

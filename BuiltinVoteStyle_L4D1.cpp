@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -33,7 +33,7 @@
 
 /* This will error out if you try to compile for lower source engines.  Since this class should only be included
  * for recent engines, I don't see that as a problem
- */ 
+ */
 SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *, const CCommand &);
 
 L4D1BuiltinVoteStyle g_L4D1BuiltinVoteStyle;
@@ -233,7 +233,7 @@ void CL4D1BuiltinVote::DisplayVoteFail(BuiltinVoteFailReason reason)
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CL4D1BuiltinVote::OnClientCommand), false);
 
 	VoteEnded();
-	
+
 	IGameEvent *failEvent = events->CreateEvent("vote_failed");
 	failEvent->SetInt("team", m_team);
 	events->FireEvent(failEvent);

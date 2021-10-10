@@ -26,9 +26,9 @@ def CopyFiles(src, dest, files):
     source_path = os.path.join(builder.sourcePath, src, source_file)
     builder.AddCopy(source_path, dest_entry)
 
-# Gamedata file
-CopyFiles('sourcemod/scripting/include', 'addons/sourcemod/scripting/include',
- [ 'builtinvotes.inc' ]
+# Include file
+CopyFiles('extra', 'addons/sourcemod/scripting/include',
+ [ 'builtinvotes.inc', ]
 )
 
 # Copy extension

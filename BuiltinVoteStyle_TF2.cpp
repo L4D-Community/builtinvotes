@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -33,7 +33,7 @@
 
 /* This will error out if you try to compile for lower source engines.  Since this class should only be included
  * for recent engines, I don't see that as a problem
- */ 
+ */
 SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *, const CCommand &);
 
 TF2BuiltinVoteStyle g_TF2BuiltinVoteStyle;
@@ -137,7 +137,7 @@ bool CTF2BuiltinVote::Display(int clients[], unsigned int num_clients)
 		const char *prefix = "option";
 
 		IGameEvent *optionsEvent = events->CreateEvent("vote_options");
-		
+
 		unsigned int maxCount = GetItemCount();
 		for (unsigned int i=0; i < maxCount; i++)
 		{
@@ -161,7 +161,7 @@ bool CTF2BuiltinVote::Display(int clients[], unsigned int num_clients)
 
 	switch (m_voteType)
 	{
-	
+
 	case BuiltinVoteType_Kick:
 		translation = TRANSLATION_TF2_VOTE_KICK_START;
 		break;
@@ -232,7 +232,7 @@ void CTF2BuiltinVote::DisplayVotePass(const char* winner)
 
 	switch (m_voteType)
 	{
-	
+
 	case BuiltinVoteType_Kick:
 	case BuiltinVoteType_KickIdle:
 	case BuiltinVoteType_KickScamming:
@@ -256,7 +256,7 @@ void CTF2BuiltinVote::DisplayVotePass(const char* winner)
 		if (stricmp(winner, TF2_EXTEND) == 0)
 		{
 			translation = TRANSLATION_TF2_VOTE_NEXTLEVEL_EXTEND_PASSED;
-		} 
+		}
 		else
 		{
 			translation = TRANSLATION_TF2_VOTE_NEXTLEVEL_PASSED;

@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -28,19 +28,19 @@
  *
  * Version: $Id$
  */
- 
+
 #include "extension.h"
 #include "util.h"
 
 CBaseEntity* UTIL_FindEntityByClassname(const char *classname)
 {
 	CBaseEntity *pEntity = (CBaseEntity *)servertools->FirstEntity();
-	
+
 	while (pEntity) {
 		if (strcmp(gamehelpers->GetEntityClassname(pEntity), classname) == 0) {
 			return pEntity;
 		}
-		
+
 		pEntity = (CBaseEntity *)servertools->NextEntity(pEntity);
 	}
 
@@ -51,9 +51,9 @@ void UTIL_ShowError(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	
+
 	g_pSM->LogError(myself, fmt, ap);
 	rootconsole->ConsolePrint(fmt, ap);
-	
+
 	va_end(ap);
 }

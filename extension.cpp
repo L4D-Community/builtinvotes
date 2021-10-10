@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -70,12 +70,12 @@ bool BuiltinVoteManager::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t ma
 	GET_V_IFACE_CURRENT(GetEngineFactory, events, IGameEventManager2, INTERFACEVERSION_GAMEEVENTSMANAGER2);
 	GET_V_IFACE_ANY(GetServerFactory, servergameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 	GET_V_IFACE_ANY(GetServerFactory, servertools, IServerTools, VSERVERTOOLS_INTERFACE_VERSION);
-	GET_V_IFACE_ANY(GetServerFactory, gameents, IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);	
-	
+	GET_V_IFACE_ANY(GetServerFactory, gameents, IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
+
 	gpGlobals = ismm->GetCGlobals();
 	g_pCVar = icvar;
 	CONVAR_REGISTER(this);
-	
+
 	return true;
 }
 
@@ -84,7 +84,7 @@ bool BuiltinVoteManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	if (!CVoteController::GetVoteControllerOffsets(error, maxlength)) {
 		return false;
 	}
-	
+
 	/* Yes, we can be accessed by other extensions in this version. \o/
 	 * Whether it works or not has yet to be tested. */
 	sharesys->AddInterface(myself, &g_BuiltinVotes);
@@ -95,7 +95,7 @@ bool BuiltinVoteManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	/* Deny cloning to votes */
 	access.access[HandleAccess_Clone] = HANDLE_RESTRICT_OWNER|HANDLE_RESTRICT_IDENTITY;
 	m_VoteType = handlesys->CreateType("IBaseBuiltinVote", this, 0, NULL, &access, myself->GetIdentity(), NULL);
-	
+
 	/* Also deny deletion to styles */
 	access.access[HandleAccess_Delete] = HANDLE_RESTRICT_OWNER|HANDLE_RESTRICT_IDENTITY;
 	m_StyleType = handlesys->CreateType("IBuiltinVoteStyle", this, 0, NULL, &access, myself->GetIdentity(), NULL);
@@ -120,12 +120,12 @@ bool BuiltinVoteManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	g_VoteHelpers.OnLoad();
 
 	sharesys->RegisterLibrary(myself, "builtinvotes");
-	
+
 	if (late) {
 		//Find a vote_controller
 		CVoteController::FindVoteController();
 	}
-	
+
 	return true;
 }
 
@@ -153,7 +153,7 @@ void BuiltinVoteManager::OnCoreMapStart(edict_t *pEdictList, int edictCount, int
 {
 	// Tell the vote handler we're changing levels
 	s_VoteHandler.OnMapStart();
-	
+
 	//Find the created vote_controller
 	CVoteController::FindVoteController();
 }

@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -44,20 +44,20 @@ CBaseHandle CVoteController::s_hVoteController;
 bool CVoteController::GetVoteControllerOffsets(char* error, size_t maxlength)
 {
 	sm_sendprop_info_t info;
-	
+
 	if (!gamehelpers->FindSendPropInfo("CVoteController", "m_activeIssueIndex", &info)) {
 		snprintf(error, maxlength, "Unable to find SendProp \"CVoteController::m_activeIssueIndex\"");
 		return false;
 	}
-	
+
 	offset_m_activeIssueIndex = info.actual_offset;
-	
+
 #if SOURCE_ENGINE == SE_LEFT4DEAD2
 	if (!gamehelpers->FindSendPropInfo("CVoteController", "m_onlyTeamToVote", &info)) {
 		snprintf(error, maxlength, "Unable to find SendProp \"CVoteController::m_onlyTeamToVote\"");
 		return false;
 	}
-	
+
 	offset_m_onlyTeamToVote = info.actual_offset;
 #endif
 
@@ -71,7 +71,7 @@ CVoteController* CVoteController::FindVoteController()
 		edict_t *pEdictVoteController = gameents->BaseEntityToEdict((CBaseEntity*)pVoteController);
 		gamehelpers->SetHandleEntity(s_hVoteController, pEdictVoteController);
 	}
-	
+
 	return pVoteController;
 }
 
@@ -81,9 +81,9 @@ CVoteController* CVoteController::GetVoteController()
 	if (pEdict != NULL) {
 		return (CVoteController*)gameents->EdictToBaseEntity(pEdict);
 	}
-	
+
 	CVoteController* pVoteController = FindVoteController();
-	
+
 	return pVoteController;
 }
 
@@ -96,7 +96,7 @@ bool CVoteController::Game_IsVoteInProgress()
 	}
 
 	int m_activeIssueIndex = (*(int *)((byte *)pVoteController + offset_m_activeIssueIndex));
-	
+
 	return (m_activeIssueIndex > INVALID_ISSUE);
 }
 
@@ -110,7 +110,7 @@ int CVoteController::Game_GetVoteTeam()
 	}
 
 	int m_onlyTeamToVote = (*(int *)((byte *)pVoteController + offset_m_onlyTeamToVote));
-	
+
 	return m_onlyTeamToVote;
 }
 #endif
