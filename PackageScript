@@ -7,6 +7,7 @@ builder.SetBuildFolder('package')
 
 # Add any folders you need to this list
 folder_list = [
+  'addons/sourcemod/scripting',
   'addons/sourcemod/scripting/include',
   'addons/sourcemod/extensions',
 ]
@@ -25,6 +26,11 @@ def CopyFiles(src, dest, files):
   for source_file in files:
     source_path = os.path.join(builder.sourcePath, src, source_file)
     builder.AddCopy(source_path, dest_entry)
+
+# Plugin files
+CopyFiles('extra', 'addons/sourcemod/scripting',
+  [ 'builtinvotes_test.sp' ]
+)
 
 # Include file
 CopyFiles('extra', 'addons/sourcemod/scripting/include',
