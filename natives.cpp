@@ -187,6 +187,49 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 
 	IPluginContext *pContext = m_pVoteResults->GetParentContext();
 
+#if SOURCEPAWN_API_VERSION >= 0x0213
+	AutoEnterHeapScope heap_scope(pContext);
+
+	/* First array */
+	cell_t client_array_address = -1;
+	if (cell_t client_array_size = results->num_clients * 2) {
+		auto init = std::make_unique<cell_t[]>(client_array_size);
+		for (unsigned int i = 0; i < results->num_clients; i++) {
+			init[i * 2] = results->client_list[i].client;
+			init[i * 2 + 1] = results->client_list[i].item;
+		}
+
+		if (!pContext->HeapAlloc2dArray(results->num_clients, 2, &client_array_address, init.get())) {
+			/*g_DbgReporter.GenerateError(pContext, m_fnVoteResult, -1,
+										"Menu callback could not allocate cells for client list.");*/
+			return;
+		}
+	}
+
+	/* Second array */
+	cell_t item_array_address = -1;
+	if (cell_t item_array_size = results->num_items * 2) {
+		auto init = std::make_unique<cell_t[]>(item_array_size);
+		for (unsigned int i = 0; i < results->num_items; i++) {
+			init[i * 2] = results->item_list[i].item;
+			init[i * 2 + 1] = results->item_list[i].count;
+		}
+		if (!pContext->HeapAlloc2dArray(results->num_items, 2, &item_array_address, init.get())) {
+			/*g_DbgReporter.GenerateError(pContext, m_fnVoteResult, -1,
+										"Menu callback could not allocate %d cells for item list.",
+										item_array_size);*/
+			return;
+		}
+	}
+
+	m_pVoteResults->PushCell(vote->GetHandle());
+	m_pVoteResults->PushCell(results->num_votes);
+	m_pVoteResults->PushCell(results->num_clients);
+	m_pVoteResults->PushCell(client_array_address);
+	m_pVoteResults->PushCell(results->num_items);
+	m_pVoteResults->PushCell(item_array_address);
+	m_pVoteResults->Execute(NULL);
+#else
 	bool no_call = false;
 	int err;
 
@@ -199,7 +242,9 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 		if ((err = pContext->HeapAlloc(client_array_size, &client_array_address, &client_array_base))
 			!= SP_ERROR_NONE)
 		{
-			//g_DbgReporter.GenerateError(pContext, m_fnVoteResult, err, "Vote callback could not allocate %d bytes for client list.", client_array_size * sizeof(cell_t));
+			/*g_DbgReporter.GenerateError(pContext, m_fnVoteResult, err, 
+										"Vote callback could not allocate %d bytes for client list.", 
+										client_array_size * sizeof(cell_t));*/
 			no_call = true;
 		} else {
 			cell_t target_offs = sizeof(cell_t) * results->num_clients;
@@ -232,7 +277,9 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 		if ((err = pContext->HeapAlloc(item_array_size, &item_array_address, &item_array_base))
 			!= SP_ERROR_NONE)
 		{
-			//g_DbgReporter.GenerateError(pContext, m_fnVoteResult, err, "Menu callback could not allocate %d bytes for item list.", item_array_size);
+			/*g_DbgReporter.GenerateError(pContext, m_fnVoteResult, err, 
+										"Menu callback could not allocate %d bytes for item list.", 
+										item_array_size);*/
 			no_call = true;
 		} else {
 			cell_t target_offs = sizeof(cell_t) * results->num_items;
@@ -278,6 +325,7 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 	{
 		pContext->HeapPop(client_array_address);
 	}
+#endif
 }
 
 bool CBuiltinVoteHandler::OnSetHandlerOption(const char *option, const void *data)
