@@ -27,27 +27,31 @@ jobs:
         sm_version:
           - "1.9"
           - "1.10"
+          - "1.11"
           - "latest"
           
         include:
-          # Use MM:Source 1.10 as base version
-          - meta_version: "1.10"
-            meta_branch: "1.10-dev"
+          # Use MM:Source 1.11 as base version
+          - meta_version: "1.11"
+            meta_branch: "1.11-dev"
             
           - sm_version: latest
             sm_branch: master
             meta_version: latest
             meta_branch: master
-            
+          
           - sm_version: "1.9"
             sm_branch: "1.9-dev"
-            
+          
           - sm_version: "1.10"
             sm_branch: "1.10-dev"
-            
+          
+          - sm_version: "1.11"
+            sm_branch: "1.11-dev"
+          
           - os: ubuntu-latest
             os_short: linux
-            
+          
           - os: windows-latest
             os_short: win
             
@@ -68,7 +72,7 @@ jobs:
           
       - name: Add msbuild to PATH (Windows)
         if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1.1
         
       - name: Install (Windows)
         if: runner.os == 'Windows'
@@ -85,7 +89,7 @@ jobs:
           )
           
       - name: Getting SourceMod ${{ matrix.sm_version }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: alliedmodders/sourcemod
           ref: ${{ matrix.sm_branch }}
@@ -93,35 +97,37 @@ jobs:
           submodules: recursive
           
       - name: Getting MM:Source ${{ matrix.meta_version }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: alliedmodders/metamod-source
           ref: ${{ matrix.meta_branch }}
           path: metamod-${{ matrix.meta_version }}
           
       - name: Getting AMBuild
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: alliedmodders/ambuild
           path: ambuild
           
       - name: Setting up Python
-        uses: actions/setup-python@v2
-        
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
       - name: Getting ambuild
         run: |
           python -m pip install wheel
           pip install git+https://github.com/alliedmodders/ambuild
           
       - name: Getting hl2sdk-l4d2
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: alliedmodders/hl2sdk
           ref: l4d2
           path: hl2sdk-l4d2
           
       - name: Getting own repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: src
           
@@ -140,7 +146,7 @@ jobs:
           ambuild
           
       - name: Uploading package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: builtinvotes-sm${{ matrix.sm_version }}-${{ matrix.os_short }}-${{ env.GITHUB_SHA_SHORT }}
+          name: ${{ github.event.repository.name }}-sm${{ matrix.sm_version }}-${{ matrix.os_short }}-${{ env.GITHUB_SHA_SHORT }}
           path: src/build/package
