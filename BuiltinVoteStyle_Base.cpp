@@ -468,7 +468,7 @@ void CBaseBuiltinVote::InternalDelete()
 		handlesys->FreeHandle(hndl, &sec);
 	}
 
-	m_pHandler->OnVoteDestroy(this);
+	m_pHandler->OnVoteDestroy(this, m_bWillFreeHandle);
 
 	delete this;
 }

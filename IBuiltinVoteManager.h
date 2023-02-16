@@ -530,7 +530,7 @@ namespace SourceMod
 		 *
 		 * @param menu			Vote pointer.
 		 */
-		virtual void OnVoteDestroy(IBaseBuiltinVote *vote)
+		virtual void OnVoteDestroy(IBaseBuiltinVote *vote, bool bReleaseHandle = true)
 		{
 		}
 
@@ -579,7 +579,7 @@ namespace SourceMod
 		 * @param data			Private data.
 		 * @return				True if set, false if invalid or unrecognized.
 		 */
-		virtual bool OnSetHandlerOption(const char *option, const void *data)
+		virtual bool OnSetHandlerOption(const char *option, const void *data, int iUserData, int iUserDataFlags, IdentityToken_t *pToken)
 		{
 			return false;
 		}

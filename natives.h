@@ -35,6 +35,8 @@
 #include "extension.h"
 #include <sh_stack.h>
 
+#define BV_DATA_HNDL_CLOSE (1 << 0)
+
 enum BuiltinVoteAction
 {
 	BuiltinVoteAction_Start = (1<<0),		/**< A vote display/sequence has started */
@@ -67,11 +69,12 @@ public:
 	//void OnVoteDisplay(IBaseBuiltinVote *vote, int client);
 	void OnVoteSelect(IBaseBuiltinVote *vote, int client, unsigned int item);
 	void OnVoteEnd(IBaseBuiltinVote *vote, BuiltinVoteEndReason reason);
-	void OnVoteDestroy(IBaseBuiltinVote *vote);
+	void OnVoteDestroy(IBaseBuiltinVote *vote, bool bReleaseHandle = true);
 	//void OnVoteVoteStart(IBaseBuiltinVote *vote);
 	void OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_result_t *results);
 	void OnVoteCancel(IBaseBuiltinVote *vote, BuiltinVoteFailReason reason);
-	bool OnSetHandlerOption(const char *option, const void *data);
+	bool OnSetHandlerOption(const char *option, const void *data, int iUserData, int iUserDataFlags, IdentityToken_t* pToken);
+	void CloseHandleUserData(bool bReleaseHandle = true);
 private:
 	cell_t DoAction(IBaseBuiltinVote *vote, BuiltinVoteAction action, cell_t param1, cell_t param2, cell_t def_res=0);
 private:
@@ -79,6 +82,10 @@ private:
 	int m_Flags;
 	IPluginFunction *m_pVoteResults;
 	cell_t m_fnVoteResult;
+
+	cell_t m_iUserData;
+	int m_iUserDataFlags;
+	IdentityToken_t* m_pOwner;
 };
 
 class EmptyBuiltinVoteHandler : public IBuiltinVoteHandler

@@ -79,7 +79,7 @@ void VoteNativeHelpers::FreeVoteHandler(CBuiltinVoteHandler *handler)
  */
 
 CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags) :
-	m_pBasic(pBasic), m_Flags(flags), m_pVoteResults(NULL)
+	m_pBasic(pBasic), m_Flags(flags), m_pVoteResults(NULL), m_iUserData(0), m_iUserDataFlags(0), m_pOwner(NULL)
 {
 	/* :TODO: We can probably cache this ahead of time */
 }
@@ -124,9 +124,10 @@ void CBuiltinVoteHandler::OnVoteEnd(IBaseBuiltinVote *vote, BuiltinVoteEndReason
 	DoAction(vote, BuiltinVoteAction_End, reason, 0);
 }
 
-void CBuiltinVoteHandler::OnVoteDestroy(IBaseBuiltinVote *vote)
+void CBuiltinVoteHandler::OnVoteDestroy(IBaseBuiltinVote *vote, bool bReleaseHandle)
 {
 	g_VoteHelpers.FreeVoteHandler(this);
+	CloseHandleUserData(bReleaseHandle);
 }
 
 void CBuiltinVoteHandler::OnVoteStart(IBaseBuiltinVote *vote)
@@ -228,6 +229,7 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 	m_pVoteResults->PushCell(client_array_address);
 	m_pVoteResults->PushCell(results->num_items);
 	m_pVoteResults->PushCell(item_array_address);
+	m_pVoteResults->PushCell(m_iUserData);
 	m_pVoteResults->Execute(NULL);
 #else
 	bool no_call = false;
@@ -312,6 +314,7 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 		m_pVoteResults->PushCell(client_array_address);
 		m_pVoteResults->PushCell(results->num_items);
 		m_pVoteResults->PushCell(item_array_address);
+		m_pVoteResults->PushCell(m_iUserData);
 		m_pVoteResults->Execute(NULL);
 	}
 
@@ -328,17 +331,53 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 #endif
 }
 
-bool CBuiltinVoteHandler::OnSetHandlerOption(const char *option, const void *data)
+bool CBuiltinVoteHandler::OnSetHandlerOption(const char *option, const void *data, int iUserData, int iUserDataFlags, IdentityToken_t* pToken)
 {
 	if (strcmp(option, "set_vote_results_handler") == 0)
 	{
 		void **array = (void **)data;
 		m_pVoteResults = (IPluginFunction *)array[0];
 		m_fnVoteResult = *(cell_t *)((cell_t *)array[1]);
+		m_iUserData = iUserData;
+		m_iUserDataFlags = iUserDataFlags;
+		m_pOwner = pToken;
 		return true;
 	}
 
 	return false;
+}
+
+void CBuiltinVoteHandler::CloseHandleUserData(bool bReleaseHandle)
+{
+	if (!(m_iUserDataFlags & BV_DATA_HNDL_CLOSE))
+	{
+		//META_CONPRINT("[BuiltinVotes] CloseHandleUserData not executed, flag 'BV_DATA_HNDL_CLOSE' not passed!\n"); // debug
+		return;
+	}
+
+	Handle_t usrhndl = static_cast<Handle_t>(m_iUserData);
+	HandleError herr;
+	HandleSecurity sec;
+
+	sec.pOwner = m_pOwner;
+	sec.pIdentity = myself->GetIdentity();
+
+	if ((herr = handlesys->FreeHandle(usrhndl, &sec)) != HandleError_None)
+	{
+		// When calling the OnHandleDestroy function, the sourcemod has already destroyed the data handle.
+		// Don't throw an error in this case.
+		if (!bReleaseHandle)
+		{
+			//META_CONPRINTF("The data handle has most likely already been destroyed %x, flag 'BV_DATA_HNDL_CLOSE' passed!\n"); // debug
+			return;
+		}
+
+		META_CONPRINTF("Invalid data handle %x (error %d), flag 'BV_DATA_HNDL_CLOSE' passed!\n", usrhndl, herr);
+		g_pSM->LogError(myself, "Invalid data handle %x (error %d), flag 'BV_DATA_HNDL_CLOSE' passed!", usrhndl, herr);
+		return;
+	}
+
+	//META_CONPRINTF("Data handle has been deleted %x, flag 'BV_DATA_HNDL_CLOSE' passed!\n", usrhndl); // debug
 }
 
 /***********************************
@@ -653,9 +692,12 @@ cell_t SetBuiltinVoteResultCallback(IPluginContext *pContext, const cell_t *para
 	void *array[2];
 	array[0] = pFunction;
 	array[1] = (void *)&params[2];
+	int iUserData = (params[0] >= 3) ? params[3] : 0;
+	int iUserDataFlags = (params[0] >= 4) ? params[4] : 0;
+	IdentityToken_t* pToken = pContext->GetIdentity();
 
 	IBuiltinVoteHandler *pHandler = vote->GetHandler();
-	if (!pHandler->OnSetHandlerOption("set_vote_results_handler", (const void *)array))
+	if (!pHandler->OnSetHandlerOption("set_vote_results_handler", (const void *)array, iUserData, iUserDataFlags, pToken))
 	{
 		return pContext->ThrowNativeError("The given vote does not support this option");
 	}

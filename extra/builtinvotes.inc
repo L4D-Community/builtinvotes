@@ -42,6 +42,8 @@
 #define BUILTINVOTES_ALL_TEAMS			-1 // Defined by TF2, may be the same in L4D/L4D2
 #define BUILTINVOTES_SERVER_INDEX 		99 // Defined by TF2, may be the same in L4D/L4D2
 
+#define BV_DATA_HNDL_CLOSE				(1 << 0)
+
 /**
  * Reasons a vote can end.
  */
@@ -392,8 +394,12 @@ native void CancelBuiltinVote();
  *							defines.
  * @noreturn
  */
-typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
-//typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][2] client_info, int num_items, const int[][2] item_info);
+//typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
+typeset BuiltinVoteHandler
+{
+	function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
+	function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info, any data);
+};
 
 /**
  * Sets an advanced vote handling callback.  If this callback is set,
@@ -401,10 +407,16 @@ typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_c
  *
  * @param vote				BuiltinVote Handle.
  * @param callback			Callback function.
+ * @param data				Handle or value to pass through to the BuiltinVoteHandler callback function.
+ * @param dataFlags			'BV_DATA_HNDL_CLOSE' for the data handle to be destroyed after the vote or 0.
+ *							If you are passing in parameter 'data' a handle (for example - DataPack) here that was supposed to be closed,
+ *							you must pass the constant 'BV_DATA_HNDL_CLOSE' to parameter 'dataFlags'.
+ *							If you pass a constant 'BV_DATA_HNDL_CLOSE' to parameter 'dataFlags',
+ *							then extension will destroy it or you have to close it yourself to avoid getting a memory leak.
  * @noreturn
  * @error					Invalid Handle or callback.
  */
-native void SetBuiltinVoteResultCallback(Handle vote, BuiltinVoteHandler callback);
+native void SetBuiltinVoteResultCallback(Handle vote, BuiltinVoteHandler callback, any data = 0, int dataFlags = 0);
 
 /**
  * Returns the number of seconds you should "wait" before displaying
