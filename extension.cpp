@@ -40,6 +40,11 @@
 #include "BuiltinVoteStyle_L4D2.h"
 #endif
 
+// memdbgon must be the last include file in a .cpp file!!!
+#if SOURCE_ENGINE == SE_LEFT4DEAD
+	#include "tier0/memdbgon.h" // hl2sdk-l4d fix error: use of undeclared identifier 'MemAlloc_Free' (icvar.h)
+#endif
+
 /**
  * @file extension.cpp
  * @brief Implement extension code here.

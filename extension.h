@@ -43,10 +43,6 @@
 #include <BuiltinVoteHandler.h>
 #include "igameevents.h"
 #include "natives.h"
-#if SOURCE_ENGINE == SE_LEFT4DEAD
-#include <commonmacros.h> // hl2sdk-l4d fix error: error C3861: 'IsPowerOfTwo': identifier not found (icvar.h) for windows
-#include <tier0/memalloc.h> // hl2sdk-l4d fix error: use of undeclared identifier 'MemAlloc_Free' (icvar.h)
-#endif
 #include "icvar.h"
 #include "util.h"
 #include "CVoteController.h"

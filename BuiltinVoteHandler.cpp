@@ -34,12 +34,12 @@
 #include "BuiltinVoteHandler.h"
 #include <ITranslator.h>
 #include <IPlayerHelpers.h>
-#if SOURCE_ENGINE == SE_LEFT4DEAD
-#include <commonmacros.h> // hl2sdk-l4d fix error: error C3861: 'IsPowerOfTwo': identifier not found (icvar.h) for windows
-#include <tier0/memalloc.h> // hl2sdk-l4d fix error: use of undeclared identifier 'MemAlloc_Free' (icvar.h)
-#endif
-#include <icvar.h>
 #include <convar.h>
+
+// memdbgon must be the last include file in a .cpp file!!!
+#if SOURCE_ENGINE == SE_LEFT4DEAD
+	#include "tier0/memdbgon.h" // hl2sdk-l4d fix error: use of undeclared identifier 'MemAlloc_Free' (icvar.h)
+#endif
 
 #define VOTE_DELAY_TIME 3
 
