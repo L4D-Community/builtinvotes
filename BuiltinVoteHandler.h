@@ -32,11 +32,13 @@
 #ifndef _INCLUDE_BUILTINVOTEHANDLER_H
 #define _INCLUDE_BUILTINVOTEHANDLER_H
 
+#include <IBuiltinVoteManager.h>
 #include <sh_vector.h>
 #include "convar.h"
-#include <IBuiltinVoteManager.h>
 #include "smsdk_ext.h"
 #include "icvar.h"
+
+class BuiltinVoteManager;
 
 // We used to need these because we cannot access smsdk_ext directly
 // #include <ITranslator.h>
@@ -144,6 +146,9 @@ private:
 extern CGlobalVars *gpGlobals;
 extern ICvar *icvar;
 extern IPhraseCollection *corePhrases;
+extern IForward* g_pStartBVFwd;
+
 extern BuiltinVoteHandler s_VoteHandler;
+extern BuiltinVoteManager g_BuiltinVotes;
 
 #endif //_INCLUDE_BUILTINVOTEHANDLER_H

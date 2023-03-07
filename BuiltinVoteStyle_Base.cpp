@@ -262,10 +262,10 @@ bool BaseBuiltinVoteStyle::RedoClientVote(int client)
 	return true;
 }
 
-
 CBaseBuiltinVote::CBaseBuiltinVote(IBuiltinVoteHandler *pHandler, IBuiltinVoteStyle *pStyle, BuiltinVoteType type, IdentityToken_t *pOwner) :
 m_pStyle(pStyle), m_Strings(512), m_bShouldDelete(false), m_bCancelling(false), m_pOwner(pOwner), m_bDeleting(false),
-m_bWillFreeHandle(false), m_hHandle(BAD_HANDLE), m_pHandler(pHandler), m_voteType(type), m_initiator(SERVER_CLIENT_INDEX), m_team(-1)
+m_bWillFreeHandle(false), m_hHandle(BAD_HANDLE), m_pHandler(pHandler), m_voteType(type), m_initiator(SERVER_CLIENT_INDEX), m_team(-1), 
+m_bResultDisplayed(false), m_bSendGameVotePanel(false)
 {
 	if (type != BuiltinVoteType_Custom_Mult && type != BuiltinVoteType_NextLevelMult)
 	{
@@ -468,7 +468,7 @@ void CBaseBuiltinVote::InternalDelete()
 		handlesys->FreeHandle(hndl, &sec);
 	}
 
-	m_pHandler->OnVoteDestroy(this, m_bWillFreeHandle);
+	m_pHandler->OnVoteDestroy(this);
 
 	delete this;
 }
@@ -551,4 +551,9 @@ bool CBaseBuiltinVote::Display(int client)
 bool CBaseBuiltinVote::IsResultDisplayed()
 {
 	return m_bResultDisplayed;
+}
+
+bool CBaseBuiltinVote::IsGameVotePanelDisplayed()
+{
+	return m_bSendGameVotePanel;
 }

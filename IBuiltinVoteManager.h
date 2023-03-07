@@ -123,7 +123,7 @@ namespace SourceMod
 	{
 		BuiltinVoteFail_Generic = 0,		/**< Vote was generically cancelled. */
 		BuiltinVoteFail_Loses = 3,			/**< No votes outnumbered Yes votes */
-		BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */
+		BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */	
 	};
 
 	/**
@@ -488,6 +488,13 @@ namespace SourceMod
 		 * @return				True if shown otherwise false.
 		 */
 		virtual bool IsResultDisplayed() =0;
+
+		/**
+		 * @brief The voting panel has been sent to the players
+		 *
+		 * @return				True if shown otherwise false.
+		 */
+		virtual bool IsGameVotePanelDisplayed() = 0;
 	};
 
 
@@ -530,7 +537,7 @@ namespace SourceMod
 		 *
 		 * @param menu			Vote pointer.
 		 */
-		virtual void OnVoteDestroy(IBaseBuiltinVote *vote, bool bReleaseHandle = true)
+		virtual void OnVoteDestroy(IBaseBuiltinVote *vote)
 		{
 		}
 
@@ -584,6 +591,15 @@ namespace SourceMod
 			return false;
 		}
 
+		virtual Handle_t GetBuiltinVotePluginHandle()
+		{
+			return 0;
+		}
+
+		virtual const char* GetBuiltinVotePluginName()
+		{
+			return nullptr;
+		}
 	};
 
 	class IBuiltinVoteManager : public SMInterface

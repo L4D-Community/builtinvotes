@@ -153,6 +153,7 @@ public:
 	bool Display(int client);
 	unsigned int GetBaseMemUsage();
 	virtual bool IsResultDisplayed();
+	virtual bool IsGameVotePanelDisplayed();
 protected:
 	unsigned int GetAllPlayers(cell_t clients[]);
 	bool DoClientVote(int clients[], unsigned int num_clients);
@@ -175,6 +176,7 @@ protected:
 	byte m_initiator;
 	short m_team;
 	bool m_bResultDisplayed;
+	bool m_bSendGameVotePanel;
 };
 
 extern BuiltinVoteManager g_BuiltinVotes;

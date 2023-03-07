@@ -47,9 +47,11 @@ CBaseBuiltinVote(pHandler, pStyle, type, pOwner)
 bool CL4DBaseBuiltinVote::UpdateVoteCounts(unsigned int items, CVector<unsigned int> votes, unsigned int totalClients)
 {
 	IGameEvent *changeEvent = events->CreateEvent("vote_changed");
+
 	changeEvent->SetInt("yesVotes", votes.at(BUILTINVOTES_VOTE_YES));
 	changeEvent->SetInt("noVotes", votes.at(BUILTINVOTES_VOTE_NO));
 	changeEvent->SetInt("potentialVotes", totalClients);
+
 	events->FireEvent(changeEvent);
 
 	return true;
@@ -57,18 +59,19 @@ bool CL4DBaseBuiltinVote::UpdateVoteCounts(unsigned int items, CVector<unsigned 
 
 void CL4DBaseBuiltinVote::OnClientCommand(edict_t *pEntity, const CCommand &cmd)
 {
-	int client = gamehelpers->IndexOfEdict(pEntity);
 	const char *cmdname = cmd.Arg(0);
 
-	if (strcmp(cmdname, "Vote") == 0) {
-		const char *voteString = cmd.Arg(1);
-		int key_press = (strcmp(voteString, "Yes") == 0) ? BUILTINVOTES_VOTE_YES : BUILTINVOTES_VOTE_NO;
-
-		s_VoteHandler.OnVoteSelect(this, client, key_press);
-		//ClientPressedKey(client, key_press);
-
-		RETURN_META(MRES_SUPERCEDE);
+	if (strcmp(cmdname, "Vote") != 0) {
+		RETURN_META(MRES_IGNORED);
 	}
 
-	RETURN_META(MRES_IGNORED);
+	int client = gamehelpers->IndexOfEdict(pEntity);
+
+	const char *voteString = cmd.Arg(1);
+	int key_press = (strcmp(voteString, "Yes") == 0) ? BUILTINVOTES_VOTE_YES : BUILTINVOTES_VOTE_NO;
+
+	s_VoteHandler.OnVoteSelect(this, client, key_press);
+	//ClientPressedKey(client, key_press);
+
+	RETURN_META(MRES_SUPERCEDE);
 }

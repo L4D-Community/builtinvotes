@@ -42,7 +42,6 @@
 #include <IBuiltinVoteManager.h>
 #include <BuiltinVoteHandler.h>
 #include "igameevents.h"
-#include "natives.h"
 #include "icvar.h"
 #include "util.h"
 #include "CVoteController.h"
@@ -178,12 +177,13 @@ private:
 	IBuiltinVoteStyle *m_VoteStyle;
 };
 
-extern BuiltinVoteManager g_BuiltinVotes;
 extern CGlobalVars *gpGlobals;
 extern BuiltinVoteHandler s_VoteHandler;
 //extern IBuiltinVoteStyle *m_VoteStyle;
 extern ICvar *icvar;
 extern IServerTools *servertools;
 extern IServerGameEnts *gameents;
+
+extern IForward* g_pCreateBVFwd;
 
 #endif //_INCLUDE_SOURCEMOD_EXTENSION_PROPER_H_

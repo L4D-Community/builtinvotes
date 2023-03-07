@@ -46,6 +46,13 @@ enum BuiltinVoteAction
 	BuiltinVoteAction_VoteEnd = (1<<4),		/**< A vote sequence has ended (param1=chosen item). */
 };
 
+enum eBuiltinVoteCreateError
+{
+	eBuiltinVoteErrorNone = 0, // Vote was created
+	eBlockedWithForward, // Vote blocked with forward 'OnBuiltinVoteCreated'
+	eInvalidParamBuiltinVoteType // Invalid parameter 'BuiltinVoteType' passed to native 'CreateBuiltinVote' or not available in this game
+};
+
 class CBuiltinVoteHandler;
 
 class VoteNativeHelpers
@@ -53,7 +60,7 @@ class VoteNativeHelpers
 public:
 	virtual void OnLoad();
 	virtual void OnUnload();
-	CBuiltinVoteHandler *GetVoteHandler(IPluginFunction *pFunction, int flags);
+	CBuiltinVoteHandler *GetVoteHandler(IPluginFunction *pFunction, int flags, const char *pPlName);
 	void FreeVoteHandler(CBuiltinVoteHandler *handler);
 private:
 	CStack<CBuiltinVoteHandler *> m_FreeVoteHandlers;
@@ -63,18 +70,21 @@ class CBuiltinVoteHandler : public IBuiltinVoteHandler
 {
 	friend class VoteNativeHelpers;
 public:
-	CBuiltinVoteHandler(IPluginFunction *pBasic, int flags);
+	CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char* sPlName = nullptr);
 public:
 	void OnVoteStart(IBaseBuiltinVote *vote);
 	//void OnVoteDisplay(IBaseBuiltinVote *vote, int client);
 	void OnVoteSelect(IBaseBuiltinVote *vote, int client, unsigned int item);
 	void OnVoteEnd(IBaseBuiltinVote *vote, BuiltinVoteEndReason reason);
-	void OnVoteDestroy(IBaseBuiltinVote *vote, bool bReleaseHandle = true);
+	void OnVoteDestroy(IBaseBuiltinVote *vote);
 	//void OnVoteVoteStart(IBaseBuiltinVote *vote);
 	void OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_result_t *results);
 	void OnVoteCancel(IBaseBuiltinVote *vote, BuiltinVoteFailReason reason);
 	bool OnSetHandlerOption(const char *option, const void *data, int iUserData, int iUserDataFlags, IdentityToken_t* pToken);
-	void CloseHandleUserData(bool bReleaseHandle = true);
+	void CloseHandleUserData();
+
+	Handle_t GetBuiltinVotePluginHandle();
+	const char* GetBuiltinVotePluginName();
 private:
 	cell_t DoAction(IBaseBuiltinVote *vote, BuiltinVoteAction action, cell_t param1, cell_t param2, cell_t def_res=0);
 private:
@@ -86,12 +96,14 @@ private:
 	cell_t m_iUserData;
 	int m_iUserDataFlags;
 	IdentityToken_t* m_pOwner;
+
+	char m_sPluginName[32];
 };
 
-class EmptyBuiltinVoteHandler : public IBuiltinVoteHandler
+/*class EmptyBuiltinVoteHandler : public IBuiltinVoteHandler
 {
 public:
-};
+};*/
 
 /***********************************
  **** NATIVE DEFINITIONS ***********
@@ -169,5 +181,6 @@ const sp_nativeinfo_t g_Natives[] =
 };
 
 extern VoteNativeHelpers g_VoteHelpers;
+extern BuiltinVoteManager g_BuiltinVotes;
 
 #endif // _INCLUDE_SOURCEMOD_NATIVES_PROPER_H_

@@ -30,6 +30,7 @@
  */
 
 #include "extension.h"
+#include "natives.h"
 #include "compat_wrappers.h"
 
 #if SOURCE_ENGINE == SE_ORANGEBOXVALVE
@@ -55,6 +56,7 @@ BuiltinVoteManager g_BuiltinVotes;		/**< Global singleton for extension's main i
 SMEXT_LINK(&g_BuiltinVotes);
 
 BuiltinVoteHandler s_VoteHandler;
+
 CGlobalVars *gpGlobals;
 ICvar *icvar;
 IPhraseCollection *corePhrases;
@@ -62,6 +64,9 @@ IServerGameClients *servergameclients;
 IGameEventManager2 *events;
 IServerTools *servertools = nullptr;
 IServerGameEnts *gameents = nullptr;
+
+IForward* g_pCreateBVFwd = nullptr;
+IForward* g_pStartBVFwd = nullptr;
 
 bool BuiltinVoteManager::RegisterConCommandBase(ConCommandBase *pVar)
 {
@@ -86,7 +91,8 @@ bool BuiltinVoteManager::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t ma
 
 bool BuiltinVoteManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 {
-	if (!CVoteController::GetVoteControllerOffsets(error, maxlength)) {
+	if (!CVoteController::GetVoteControllerOffsets(error, maxlength))
+	{
 		return false;
 	}
 
@@ -126,7 +132,11 @@ bool BuiltinVoteManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 
 	sharesys->RegisterLibrary(myself, "builtinvotes");
 
-	if (late) {
+	g_pCreateBVFwd = forwards->CreateForward("OnBuiltinVoteCreate", ET_Hook, 2, NULL, Param_Cell, Param_String);
+	g_pStartBVFwd = forwards->CreateForward("OnBuiltinVoteStart", ET_Hook, 3, NULL, Param_Cell, Param_Cell, Param_String);
+
+	if (late)
+	{
 		//Find a vote_controller
 		CVoteController::FindVoteController();
 	}
@@ -152,6 +162,9 @@ void BuiltinVoteManager::SDK_OnUnload()
 	corePhrases->Destroy();
 
 	handlesys->RemoveType(m_VoteType, myself->GetIdentity());
+
+	forwards->ReleaseForward(g_pCreateBVFwd);
+	forwards->ReleaseForward(g_pStartBVFwd);
 }
 
 void BuiltinVoteManager::OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax)
@@ -165,17 +178,24 @@ void BuiltinVoteManager::OnCoreMapStart(edict_t *pEdictList, int edictCount, int
 
 void BuiltinVoteManager::OnHandleDestroy(HandleType_t type, void *object)
 {
-	if (type == m_VoteType) {
-		if (IsVoteInProgress()) {
+	if (type == m_VoteType)
+	{
+		if (IsVoteInProgress())
+		{
 			CancelVoting();
 			META_CONPRINT("[BuiltinVotes] Vote handle destroyed - vote cancel!\n");
 		}
 
 		IBaseBuiltinVote *vote = (IBaseBuiltinVote *)object;
 		vote->Destroy(false);
-	} else if (type == m_StyleType) {
-		/* Do nothing */
+
+		return;
 	}
+
+	/*if (type == m_StyleType)
+	{
+		// Do nothing
+	}*/
 }
 
 bool BuiltinVoteManager::GetHandleApproxSize(HandleType_t type, void *object, unsigned int *pSize)

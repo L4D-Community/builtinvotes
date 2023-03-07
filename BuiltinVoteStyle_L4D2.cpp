@@ -189,6 +189,7 @@ bool CL4D2BuiltinVote::Display(int clients[], unsigned int num_clients)
 	usermsgs->EndMessage();
 
 	m_bResultDisplayed = false;
+	m_bSendGameVotePanel = true;
 
 	SH_ADD_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CL4D2BuiltinVote::OnClientCommand), false);
 
@@ -252,6 +253,7 @@ void CL4D2BuiltinVote::DisplayVotePass(const char *winner)
 void CL4D2BuiltinVote::DisplayVotePass(const char *translation, const char *winner)
 {
 	m_bResultDisplayed = true;
+	m_bSendGameVotePanel = false;
 
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CL4D2BuiltinVote::OnClientCommand), false);
 
@@ -285,6 +287,7 @@ void CL4D2BuiltinVote::DisplayVoteFail(int client, BuiltinVoteFailReason reason)
 void CL4D2BuiltinVote::InternalDisplayVoteFail(int clients[], unsigned int num_clients, BuiltinVoteFailReason reason)
 {
 	m_bResultDisplayed = true;
+	m_bSendGameVotePanel = false;
 
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CL4D2BuiltinVote::OnClientCommand), false);
 

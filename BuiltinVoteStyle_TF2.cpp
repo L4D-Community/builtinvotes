@@ -220,6 +220,7 @@ bool CTF2BuiltinVote::Display(int clients[], unsigned int num_clients)
 	usermsgs->EndMessage();
 
 	m_bResultDisplayed = false;
+	m_bSendGameVotePanel = true;
 
 	SH_ADD_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CTF2BuiltinVote::OnClientCommand), false);
 
@@ -281,6 +282,8 @@ void CTF2BuiltinVote::DisplayVotePass(const char* winner)
 void CTF2BuiltinVote::DisplayVotePass(const char *translation, const char* winner)
 {
 	m_bResultDisplayed = true;
+	m_bSendGameVotePanel = false;
+
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CTF2BuiltinVote::OnClientCommand), false);
 
 	// Display the vote pass message
@@ -301,6 +304,8 @@ void CTF2BuiltinVote::DisplayVotePass(const char *translation, const char* winne
 void CTF2BuiltinVote::DisplayVoteFail(BuiltinVoteFailReason reason)
 {
 	m_bResultDisplayed = true;
+	m_bSendGameVotePanel = false;
+
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CTF2BuiltinVote::OnClientCommand), false);
 
 	// Display the vote fail message
@@ -327,6 +332,7 @@ void CTF2BuiltinVote::InternalDisplayVoteFail(int clients[], unsigned int num_cl
 	bf_write *bf = usermsgs->StartBitBufMessage(msgId, clients, num_clients, USERMSG_RELIABLE);
 	bf->WriteByte(GetTeam());
 	bf->WriteByte(reason);
+
 	usermsgs->EndMessage();
 }
 
@@ -361,9 +367,11 @@ void CTF2BuiltinVote::ClientSelectedItem(int client, unsigned int item)
 
 	//Fire the vote_cast event
 	IGameEvent *castEvent = events->CreateEvent("vote_cast");
+
 	castEvent->SetInt("team", GetTeam());
 	castEvent->SetInt("entityid", client);
 	castEvent->SetInt("vote_option", item);
+
 	events->FireEvent(castEvent);
 
 	//CBaseBuiltinVote::ClientPressedKey(client, key_press);

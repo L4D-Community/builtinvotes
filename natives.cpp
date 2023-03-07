@@ -33,7 +33,7 @@
 #include "CVoteController.h"
 
 VoteNativeHelpers g_VoteHelpers;
-EmptyBuiltinVoteHandler s_EmptyBuiltinVoteHandler;
+//EmptyBuiltinVoteHandler s_EmptyBuiltinVoteHandler;
 static unsigned int *s_CurSelectPosition = NULL;
 
 /**
@@ -53,19 +53,25 @@ void VoteNativeHelpers::OnUnload()
 	}
 }
 
-CBuiltinVoteHandler *VoteNativeHelpers::GetVoteHandler(IPluginFunction *pFunction, int flags)
+CBuiltinVoteHandler *VoteNativeHelpers::GetVoteHandler(IPluginFunction *pFunction, int flags, const char* pPlName)
 {
-	CBuiltinVoteHandler *handler;
+	CBuiltinVoteHandler *handler = nullptr;
+
 	if (m_FreeVoteHandlers.empty())
 	{
-		handler = new CBuiltinVoteHandler(pFunction, flags);
-	} else {
-		handler = m_FreeVoteHandlers.front();
-		m_FreeVoteHandlers.pop();
-		handler->m_pBasic = pFunction;
-		handler->m_Flags = flags;
-		handler->m_pVoteResults = NULL;
+		handler = new CBuiltinVoteHandler(pFunction, flags, pPlName);
+		return handler;
 	}
+
+	handler = m_FreeVoteHandlers.front();
+
+	m_FreeVoteHandlers.pop();
+
+	handler->m_pBasic = pFunction;
+	handler->m_Flags = flags;
+	handler->m_pVoteResults = NULL;
+	strncpy(handler->m_sPluginName, pPlName, sizeof(handler->m_sPluginName));
+
 	return handler;
 }
 
@@ -77,10 +83,10 @@ void VoteNativeHelpers::FreeVoteHandler(CBuiltinVoteHandler *handler)
 /**
  * VOTE HANDLER WRAPPER
  */
-
-CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags) :
+CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char *pPlName) :
 	m_pBasic(pBasic), m_Flags(flags), m_pVoteResults(NULL), m_iUserData(0), m_iUserDataFlags(0), m_pOwner(NULL)
 {
+	strncpy(m_sPluginName, pPlName, sizeof(m_sPluginName));
 	/* :TODO: We can probably cache this ahead of time */
 }
 
@@ -116,7 +122,9 @@ void CBuiltinVoteHandler::OnVoteSelect(IBaseBuiltinVote *vote, int client, unsig
 
 void CBuiltinVoteHandler::OnVoteEnd(IBaseBuiltinVote *vote, BuiltinVoteEndReason reason)
 {
-	if (!vote->IsResultDisplayed())
+	// If we never send the voting results panel, then the voting panel will be shown to players indefinitely.
+	// For game Left4Dead2, not tested in other games.
+	if (vote->IsGameVotePanelDisplayed() && !vote->IsResultDisplayed())
 	{
 		vote->DisplayVoteFail(BuiltinVoteFail_Generic);
 	}
@@ -124,10 +132,10 @@ void CBuiltinVoteHandler::OnVoteEnd(IBaseBuiltinVote *vote, BuiltinVoteEndReason
 	DoAction(vote, BuiltinVoteAction_End, reason, 0);
 }
 
-void CBuiltinVoteHandler::OnVoteDestroy(IBaseBuiltinVote *vote, bool bReleaseHandle)
+void CBuiltinVoteHandler::OnVoteDestroy(IBaseBuiltinVote *vote)
 {
 	g_VoteHelpers.FreeVoteHandler(this);
-	CloseHandleUserData(bReleaseHandle);
+	CloseHandleUserData();
 }
 
 void CBuiltinVoteHandler::OnVoteStart(IBaseBuiltinVote *vote)
@@ -174,7 +182,9 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 			srand(time(NULL));
 			winning_item = rand() % num_items;
 			winning_item = results->item_list[winning_item].item;
-		} else {
+		}
+		else
+		{
 			/* No, take the first. */
 			winning_item = results->item_list[0].item;
 		}
@@ -333,21 +343,22 @@ void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_
 
 bool CBuiltinVoteHandler::OnSetHandlerOption(const char *option, const void *data, int iUserData, int iUserDataFlags, IdentityToken_t* pToken)
 {
-	if (strcmp(option, "set_vote_results_handler") == 0)
+	if (strcmp(option, "set_vote_results_handler") != 0)
 	{
-		void **array = (void **)data;
-		m_pVoteResults = (IPluginFunction *)array[0];
-		m_fnVoteResult = *(cell_t *)((cell_t *)array[1]);
-		m_iUserData = iUserData;
-		m_iUserDataFlags = iUserDataFlags;
-		m_pOwner = pToken;
-		return true;
+		return false;
 	}
 
-	return false;
+	void **array = (void **)data;
+	m_pVoteResults = (IPluginFunction *)array[0];
+	m_fnVoteResult = *(cell_t *)((cell_t *)array[1]);
+	m_iUserData = iUserData;
+	m_iUserDataFlags = iUserDataFlags;
+	m_pOwner = pToken;
+
+	return true;
 }
 
-void CBuiltinVoteHandler::CloseHandleUserData(bool bReleaseHandle)
+void CBuiltinVoteHandler::CloseHandleUserData()
 {
 	if (!(m_iUserDataFlags & BV_DATA_HNDL_CLOSE))
 	{
@@ -366,18 +377,37 @@ void CBuiltinVoteHandler::CloseHandleUserData(bool bReleaseHandle)
 	{
 		// When calling the OnHandleDestroy function, the sourcemod has already destroyed the data handle.
 		// Don't throw an error in this case.
-		if (!bReleaseHandle)
+		if (herr == HandleError_Freed)
 		{
-			//META_CONPRINTF("The data handle has most likely already been destroyed %x, flag 'BV_DATA_HNDL_CLOSE' passed!\n"); // debug
+			//META_CONPRINTF("The data handle already destroyed %x, flag 'BV_DATA_HNDL_CLOSE' passed!\n"); // debug
 			return;
 		}
 
 		META_CONPRINTF("Invalid data handle %x (error %d), flag 'BV_DATA_HNDL_CLOSE' passed!\n", usrhndl, herr);
 		g_pSM->LogError(myself, "Invalid data handle %x (error %d), flag 'BV_DATA_HNDL_CLOSE' passed!", usrhndl, herr);
+
 		return;
 	}
 
 	//META_CONPRINTF("Data handle has been deleted %x, flag 'BV_DATA_HNDL_CLOSE' passed!\n", usrhndl); // debug
+}
+
+Handle_t CBuiltinVoteHandler::GetBuiltinVotePluginHandle()
+{
+	if (m_pBasic == nullptr)
+	{
+		return 0;
+	}
+
+	sp_context_t *pCtx_t = m_pBasic->GetParentContext()->GetContext();
+	IPlugin* pPlugin = plsys->FindPluginByContext(pCtx_t);
+
+	return pPlugin->GetMyHandle();
+}
+
+const char* CBuiltinVoteHandler::GetBuiltinVotePluginName()
+{
+	return m_sPluginName;
 }
 
 /***********************************
@@ -389,19 +419,67 @@ cell_t CreateBuiltinVote(IPluginContext *pContext, const cell_t *params)
 	IBuiltinVoteStyle *style = g_BuiltinVotes.GetStyle();
 	IPluginFunction *pFunction;
 
-	if ((pFunction=pContext->GetFunctionById(params[1])) == NULL)
+	if ((pFunction = pContext->GetFunctionById(params[1])) == NULL)
 	{
 		return pContext->ThrowNativeError("Function id %x is invalid", params[1]);
 	}
 
-	CBuiltinVoteHandler *handler = g_VoteHelpers.GetVoteHandler(pFunction, params[3]);
+	IPlugin* pPlugin = plsys->FindPluginByContext(pContext->GetContext());
+	const char *sPlName = pPlugin->GetFilename();
+
+	// Check if this parameter has been passed for backwards compatibility with plugins built on the old include.
+	cell_t* addr = nullptr;
+	if (params[0] >= 4)
+	{
+		pContext->LocalToPhysAddr(params[4], &addr);
+
+		*addr = (cell_t)eBuiltinVoteErrorNone;
+	}
+
+	if (g_pCreateBVFwd->GetFunctionCount() > 0)
+	{
+		cell_t iPlRetValue = Pl_Continue;
+
+		g_pCreateBVFwd->PushCell(pPlugin->GetMyHandle());
+		g_pCreateBVFwd->PushString(sPlName);
+		g_pCreateBVFwd->Execute(&iPlRetValue);
+		
+		if (iPlRetValue > Pl_Continue)
+		{
+			if (addr)
+			{
+				*addr = (cell_t)eBlockedWithForward;
+			}
+
+			return BAD_HANDLE;
+		}
+	}
+
+	CBuiltinVoteHandler *handler = g_VoteHelpers.GetVoteHandler(pFunction, params[3], sPlName);
 	BuiltinVoteType type = (BuiltinVoteType)params[2];
 
 	IBaseBuiltinVote *vote = style->CreateVote(handler, type, pContext->GetIdentity());
 
+	// At this point, if an invalid "BuiltinVoteType" argument is passed, 
+	// or the game doesn't support this type of voting, variable 'vote' will be set to NULL and we'll get a server crash.
+	if (vote == NULL)
+	{
+		if (addr)
+		{
+			*addr = (cell_t)eInvalidParamBuiltinVoteType;
+		}
+
+		return BAD_HANDLE;
+	}
+
 	Handle_t hndl = vote->GetHandle();
 	if (!hndl)
 	{
+		if (addr)
+		{
+			*addr = (cell_t)eInvalidParamBuiltinVoteType;
+		}
+
 		vote->Destroy();
 		return BAD_HANDLE;
 	}

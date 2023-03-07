@@ -74,7 +74,6 @@ enum BuiltinVoteType
 	BuiltinVoteType_ScrambleEnd = 13,	/**< TF2: Yes/No, argument ignored */
 	BuiltinVoteType_Custom_Mult = 14,	/**< TF2: Multiple-choice, argument is vote text. */
 	BuiltinVoteType_Alltalk = 15,		/**< L4D2: Yes/No, argument ignored (handled internally by extension) */
-
 }
 
 /**
@@ -173,7 +172,7 @@ enum BuiltinVoteFailReason
 {
 	BuiltinVoteFail_Generic = 0,		/**< Vote was generically cancelled. */
 	BuiltinVoteFail_Loses = 3,			/**< No votes outnumbered Yes votes */
-	BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */
+	BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */	
 }
 
 enum eVoteType
@@ -182,6 +181,35 @@ enum eVoteType
 	eBuiltinVote = 0,
 	eGameVote = 1
 };
+
+enum eBuiltinVoteCreateError
+{
+	eBuiltinVoteErrorNone = 0, // Vote was created
+	eBlockedWithForward, // Vote blocked with forward 'OnBuiltinVoteCreated'
+	eInvalidParamBuiltinVoteType // Invalid parameter 'BuiltinVoteType' passed to native 'CreateBuiltinVote' or not available in this game
+};
+
+/**
+ * Called at the start of creating a vote, at this moment information such as argument, initiator, etc. is not available.
+ * NOTE: When using this forward, you need to add a check to the plugin for the vote handle, 
+ * otherwise there will be errors in the logs of the sourcemod, because the vote handle will not be set after blocking the forward.
+ *
+ * @param hPlugin			Handle to the plugin from which the vote was created.
+ * @param sPluginName		The name of the plugin from which the vote was created.
+ * @return					'Plugin_Continue' to allow voting, otherwise voting will be blocked.
+ */
+forward Action OnBuiltinVoteCreate(Handle hPlugin, const char[] sPluginName);
+
+/**
+ * Called when a vote is created and the vote panel has not yet been sent to the players,
+ * at this moment information such as argument, initiator, etc. is available.
+ *
+ * @param hVote				Vote Handle.
+ * @param hPlugin			Handle to the plugin from which the vote was created.
+ * @param sPluginName		The saved name of the plugin from which the vote was created.
+ * @return					'Plugin_Continue' to allow voting, otherwise voting will be blocked.
+ */
+forward Action OnBuiltinVoteStart(Handle hVote, Handle hPlugin, const char[] sPluginName);
 
 /**
  * Called when a vote action is completed.
@@ -204,9 +232,11 @@ typedef BuiltinVoteActionHandler = function void(Handle vote, BuiltinVoteAction 
  *							Cancel, and End will always be received regardless
  *							of whether they are set or not.  They are also
  *							the only default actions.
- * @return					A new vote Handle.
+ * @param error				The reason why the vote was not created.
+ *
+ * @return					A new vote Handle or null if vote was not created.
  */
-native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions=BUILTINVOTE_ACTIONS_DEFAULT);
+native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions = BUILTINVOTE_ACTIONS_DEFAULT, eBuiltinVoteCreateError &error);
 
 /**
  * Broadcasts a vote to a list of clients.  The most selected item will be

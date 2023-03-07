@@ -71,10 +71,8 @@ IBaseBuiltinVote *L4D1BuiltinVoteStyle::CreateVote(IBuiltinVoteHandler *handler,
 	{
 		return new CL4D1BuiltinVote(handler, this, type, pOwner);
 	}
-	else
-	{
-		return NULL;
-	}
+
+	return NULL;
 }
 
 const char *L4D1BuiltinVoteStyle::GetStyleName()
@@ -142,6 +140,7 @@ bool CL4D1BuiltinVote::Display(int clients[], unsigned int num_clients)
 	}
 
 	IGameEvent *startEvent = events->CreateEvent("vote_started");
+
 	startEvent->SetInt("team", m_team);
 	startEvent->SetInt("initiator", m_initiator);
 	startEvent->SetString("issue", translation);
@@ -150,6 +149,7 @@ bool CL4D1BuiltinVote::Display(int clients[], unsigned int num_clients)
 	events->FireEvent(startEvent);
 
 	m_bResultDisplayed = false;
+	m_bSendGameVotePanel = true;
 
 	SH_ADD_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CL4D1BuiltinVote::OnClientCommand), false);
 
@@ -214,28 +214,34 @@ void CL4D1BuiltinVote::DisplayVotePass(const char *winner)
 void CL4D1BuiltinVote::DisplayVotePass(const char *translation, const char* winner)
 {
 	m_bResultDisplayed = true;
+	m_bSendGameVotePanel = false;
 
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CL4D1BuiltinVote::OnClientCommand), false);
 
 	VoteEnded();
 
 	IGameEvent *passEvent = events->CreateEvent("vote_passed");
+
 	passEvent->SetString("details", translation);
 	passEvent->SetString("param1", winner);
 	passEvent->SetInt("team", m_team);
+
 	events->FireEvent(passEvent);
 }
 
 void CL4D1BuiltinVote::DisplayVoteFail(BuiltinVoteFailReason reason)
 {
 	m_bResultDisplayed = true;
+	m_bSendGameVotePanel = false;
 
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, servergameclients, SH_MEMBER(this, &CL4D1BuiltinVote::OnClientCommand), false);
 
 	VoteEnded();
 
 	IGameEvent *failEvent = events->CreateEvent("vote_failed");
+
 	failEvent->SetInt("team", m_team);
+
 	events->FireEvent(failEvent);
 }
 

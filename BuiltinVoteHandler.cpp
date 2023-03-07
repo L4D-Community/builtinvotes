@@ -29,9 +29,10 @@
  * Version: $Id$
  */
 
+#include "extension.h"
+#include "BuiltinVoteHandler.h"
 #include <string.h>
 #include <stdlib.h>
-#include "BuiltinVoteHandler.h"
 #include <ITranslator.h>
 #include <IPlayerHelpers.h>
 #include <convar.h>
@@ -249,6 +250,36 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 	if (!InitializeVoting(vote, vote->GetHandler(), max_time, flags))
 	{
 		return false;
+	}
+
+	if (g_pStartBVFwd->GetFunctionCount() > 0)
+	{
+		cell_t iPlRetValue = Pl_Continue;
+		IBuiltinVoteHandler *pVoteHandler = vote->GetHandler();
+
+		g_pStartBVFwd->PushCell(vote->GetHandle());
+		g_pStartBVFwd->PushCell(pVoteHandler->GetBuiltinVotePluginHandle());
+		g_pStartBVFwd->PushString(pVoteHandler->GetBuiltinVotePluginName());
+		g_pStartBVFwd->Execute(&iPlRetValue);
+		
+		if (iPlRetValue > Pl_Continue)
+		{
+			InternalReset();
+
+			// Tell the plugin that voting is over so that it clears the descriptors
+			//pVoteHandler->OnVoteCancel(vote, BuiltinVoteFail_Generic);
+			pVoteHandler->OnVoteEnd(vote, BuiltinVoteEnd_Cancelled);
+
+			// Let's try to get a pointer to class 'IBaseBuiltinVote' again, 
+			// maybe we already deleted it in function 'OnHandleDestroy', or the plugin called the 'delete' or 'CloseHandle' method, 
+			// if we try to delete it again, we'll get a crash.
+			if (g_BuiltinVotes.ReadVoteHandle(vote->GetHandle(), &vote) == HandleError_None)
+			{
+				vote->Destroy(true);
+			}
+
+			return false;
+		}
 	}
 
 	/* Note: we can use game time and not universal time because
@@ -481,9 +512,12 @@ void BuiltinVoteHandler::EndVoting()
 		 */
 		IBaseBuiltinVote *vote = m_pCurVote;
 		IBuiltinVoteHandler *handler = m_pHandler;
+
 		InternalReset();
+
 		handler->OnVoteCancel(vote, BuiltinVoteFail_Generic);
 		handler->OnVoteEnd(vote, BuiltinVoteEnd_Cancelled);
+
 		return;
 	}
 
@@ -510,7 +544,9 @@ void BuiltinVoteHandler::EndVoting()
 	{
 		IBaseBuiltinVote *vote = m_pCurVote;
 		IBuiltinVoteHandler *handler = m_pHandler;
+
 		InternalReset();
+
 		handler->OnVoteCancel(vote, BuiltinVoteFail_NotEnoughVotes);
 		handler->OnVoteEnd(vote, BuiltinVoteEnd_Cancelled);
 		return;
@@ -539,6 +575,7 @@ void BuiltinVoteHandler::EndVoting()
 	 */
 	IBaseBuiltinVote *vote = m_pCurVote;
 	IBuiltinVoteHandler *handler = m_pHandler;
+
 	InternalReset();
 
 	/* Send vote info */
@@ -662,6 +699,9 @@ void BuiltinVoteHandler::InternalReset()
 	m_bCancelled = false;
 	m_pHandler = NULL;
 	m_leaderList[0] = '\0';
+
+	m_VoteTime = 0;
+	m_VoteFlags = 0;
 
 	m_TotalClients = 0;
 
