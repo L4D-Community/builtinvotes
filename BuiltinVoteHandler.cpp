@@ -256,12 +256,13 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 	{
 		cell_t iPlRetValue = Pl_Continue;
 		IBuiltinVoteHandler *pVoteHandler = vote->GetHandler();
+		Handle_t hVoteHandle = vote->GetHandle();
 
-		g_pStartBVFwd->PushCell(vote->GetHandle());
+		g_pStartBVFwd->PushCell(hVoteHandle);
 		g_pStartBVFwd->PushCell(pVoteHandler->GetBuiltinVotePluginHandle());
 		g_pStartBVFwd->PushString(pVoteHandler->GetBuiltinVotePluginName());
 		g_pStartBVFwd->Execute(&iPlRetValue);
-		
+
 		if (iPlRetValue > Pl_Continue)
 		{
 			InternalReset();
@@ -273,7 +274,7 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 			// Let's try to get a pointer to class 'IBaseBuiltinVote' again, 
 			// maybe we already deleted it in function 'OnHandleDestroy', or the plugin called the 'delete' or 'CloseHandle' method, 
 			// if we try to delete it again, we'll get a crash.
-			if (g_BuiltinVotes.ReadVoteHandle(vote->GetHandle(), &vote) == HandleError_None)
+			if (g_BuiltinVotes.ReadVoteHandle(hVoteHandle, &vote) == HandleError_None)
 			{
 				vote->Destroy(true);
 			}
@@ -614,79 +615,88 @@ void BuiltinVoteHandler::OnVoteDisplay(IBaseBuiltinVote *vote, int client)
 
 void BuiltinVoteHandler::OnVoteSelect(IBaseBuiltinVote *vote, int client, unsigned int item)
 {
-	if (IsVoteInProgress() && m_ClientVotes[client] == VOTE_PENDING)
+	if (!IsVoteInProgress())
 	{
-		/* Check by our item count, NOT the vote array size */
-		if (item < m_Items)
+		return;
+	}
+
+	if (m_ClientVotes[client] != VOTE_PENDING)
+	{
+		return;
+	}
+
+	/* Check by our item count, NOT the vote array size */
+	if (item < m_Items)
+	{
+		vote->ClientSelectedItem(client, item);
+		m_ClientVotes[client] = item;
+		m_Votes[item]++;
+		m_NumVotes++;
+
+		if (sm_vote_chat->GetBool() || sm_vote_console->GetBool())
 		{
-			vote->ClientSelectedItem(client, item);
-			m_ClientVotes[client] = item;
-			m_Votes[item]++;
-			m_NumVotes++;
+			static char buffer[1024];
+			const char *choice;
+			choice = vote->GetItemDisplay(item);
 
-			if (sm_vote_chat->GetBool() || sm_vote_console->GetBool())
+			if (sm_vote_console->GetBool())
 			{
-				static char buffer[1024];
-				const char *choice;
-				choice = vote->GetItemDisplay(item);
-
-				if (sm_vote_console->GetBool())
-				{
-					int target = SOURCEMOD_SERVER_LANGUAGE;
+				int target = SOURCEMOD_SERVER_LANGUAGE;
 
 #ifdef _DEBUG
-					smutils->LogMessage(myself, "Sending vote cast to server console.");
+				smutils->LogMessage(myself, "Sending vote cast to server console.");
 #endif
-					Translate(buffer, sizeof(buffer), "[BV] %T", 4, NULL, "Voted For", &target, playerhelpers->GetGamePlayer(client)->GetName(), choice);
-					engine->LogPrint(buffer);
-				}
+				Translate(buffer, sizeof(buffer), "[BV] %T", 4, NULL, "Voted For", &target, playerhelpers->GetGamePlayer(client)->GetName(), choice);
+				engine->LogPrint(buffer);
+			}
 
-				if (sm_vote_chat->GetBool() || sm_vote_client_console->GetBool())
+			if (sm_vote_chat->GetBool() || sm_vote_client_console->GetBool())
+			{
+				int maxclients = playerhelpers->GetMaxClients();
+				for (int i = 1; i <= maxclients; i++)
 				{
-					int maxclients = playerhelpers->GetMaxClients();
-					for (int i=1; i<=maxclients; i++)
+					IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(i);
+					assert(pPlayer);
+
+					if (pPlayer->IsInGame() && !pPlayer->IsFakeClient())
 					{
-						IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(i);
-						assert(pPlayer);
-
-						if(pPlayer->IsInGame() && !pPlayer->IsFakeClient())
+						if (m_Revoting[client])
 						{
-							if (m_Revoting[client])
-							{
-								Translate(buffer, sizeof(buffer), "[BV] %T", 4, NULL, "Changed Vote", &i, playerhelpers->GetGamePlayer(client)->GetName(), choice);
-							}
-							else
-							{
-								Translate(buffer, sizeof(buffer), "[BV] %T", 4, NULL, "Voted For", &i, playerhelpers->GetGamePlayer(client)->GetName(), choice);
-							}
+							Translate(buffer, sizeof(buffer), "[BV] %T", 4, NULL, "Changed Vote", &i, playerhelpers->GetGamePlayer(client)->GetName(), choice);
+						}
+						else
+						{
+							Translate(buffer, sizeof(buffer), "[BV] %T", 4, NULL, "Voted For", &i, playerhelpers->GetGamePlayer(client)->GetName(), choice);
+						}
 
-							if (sm_vote_chat->GetBool())
-							{
+						if (sm_vote_chat->GetBool())
+						{
 #ifdef _DEBUG
-								smutils->LogMessage(myself, "Sending vote cast to chat for %s.", pPlayer->GetName());
+							smutils->LogMessage(myself, "Sending vote cast to chat for %s.", pPlayer->GetName());
 #endif
-								gamehelpers->TextMsg(i, TEXTMSG_DEST_CHAT, buffer);
-							}
+							gamehelpers->TextMsg(i, TEXTMSG_DEST_CHAT, buffer);
+						}
 
-							if (sm_vote_client_console->GetBool())
-							{
+						if (sm_vote_client_console->GetBool())
+						{
 #ifdef _DEBUG
-								smutils->LogMessage(myself, "Sending vote cast to client console for %s.", pPlayer->GetName());
+							smutils->LogMessage(myself, "Sending vote cast to client console for %s.", pPlayer->GetName());
 #endif
-								engine->ClientPrintf(pPlayer->GetEdict(), buffer);
-							}
+							engine->ClientPrintf(pPlayer->GetEdict(), buffer);
 						}
 					}
 				}
 			}
-			vote->UpdateVoteCounts(m_Items, m_Votes, m_TotalClients); // Same thing as BuildVoteLeaders, but for L4D/L4D2 internals
-			BuildVoteLeaders();
-			DrawHintProgress();
 		}
 
-		m_pHandler->OnVoteSelect(vote, client, item);
-		DecrementPlayerCount(); // Added here when EndVote got removed
+		vote->UpdateVoteCounts(m_Items, m_Votes, m_TotalClients); // Same thing as BuildVoteLeaders, but for L4D/L4D2 internals
+
+		BuildVoteLeaders();
+		DrawHintProgress();
 	}
+
+	m_pHandler->OnVoteSelect(vote, client, item);
+	DecrementPlayerCount(); // Added here when EndVote got removed
 }
 
 void BuiltinVoteHandler::InternalReset()

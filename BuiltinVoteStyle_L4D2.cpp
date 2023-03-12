@@ -83,10 +83,8 @@ IBaseBuiltinVote *L4D2BuiltinVoteStyle::CreateVote(IBuiltinVoteHandler *handler,
 
 		return new CL4D2BuiltinVote(handler, this, type, pOwner);
 	}
-	else
-	{
-		return NULL;
-	}
+
+	return NULL;
 }
 
 const char *L4D2BuiltinVoteStyle::GetStyleName()

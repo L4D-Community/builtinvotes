@@ -267,7 +267,6 @@ void CL4D1BuiltinVote::ClientSelectedItem(int client, unsigned int item)
 		case BUILTINVOTES_VOTE_YES:
 			castEvent = events->CreateEvent("vote_cast_yes");
 			break;
-
 		}
 
 		if (castEvent != NULL)

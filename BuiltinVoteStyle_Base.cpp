@@ -38,7 +38,7 @@ m_hHandle(BAD_HANDLE), m_players(new CBaseBuiltinVotePlayer[256+1])
 
 BaseBuiltinVoteStyle::~BaseBuiltinVoteStyle()
 {
-	delete [] m_players;
+	delete[] m_players;
 }
 
 Handle_t BaseBuiltinVoteStyle::GetHandle()
@@ -448,7 +448,9 @@ void CBaseBuiltinVote::Destroy(bool releaseHandle)
 	{
 		Cancel();
 		InternalDelete();
-	} else {
+	}
+	else
+	{
 		m_bShouldDelete = true;
 	}
 }
