@@ -30,7 +30,7 @@
  */
 
 #include "natives.h"
-#include "CVoteController.h"
+#include "votecontroller.h"
 
 VoteNativeHelpers g_VoteHelpers;
 //EmptyBuiltinVoteHandler s_EmptyBuiltinVoteHandler;

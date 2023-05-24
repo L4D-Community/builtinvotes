@@ -30,7 +30,7 @@
  */
 
 #include "extension.h"
-#include "CVoteController.h"
+#include "votecontroller.h"
 
 #define INVALID_ISSUE			-1
 

@@ -33,7 +33,7 @@ CopyFiles('extra', 'addons/sourcemod/scripting',
 )
 
 # Include file
-CopyFiles('extra', 'addons/sourcemod/scripting/include',
+CopyFiles('extra/include', 'addons/sourcemod/scripting/include',
  [ 'builtinvotes.inc', ]
 )
 

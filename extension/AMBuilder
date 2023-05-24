@@ -8,7 +8,7 @@ project.sources += [
   'extension.cpp',
   'BuiltinVoteHandler.cpp',
   'BuiltinVoteStyle_Base.cpp',
-  'CVoteController.cpp',
+  'votecontroller.cpp',
   'natives.cpp',
   'util.cpp',
   os.path.join(Extension.sm_root, 'public', 'smsdk_ext.cpp'),

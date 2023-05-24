@@ -44,7 +44,7 @@
 #include "igameevents.h"
 #include "icvar.h"
 #include "util.h"
-#include "CVoteController.h"
+#include "votecontroller.h"
 
 /**
  * @brief Sample implementation of the SDK Extension.
