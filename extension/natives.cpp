@@ -487,6 +487,11 @@ cell_t CreateBuiltinVote(IPluginContext *pContext, const cell_t *params)
 	return hndl;
 }
 
+cell_t CreateBuiltinVoteEx(IPluginContext* pContext, const cell_t* params)
+{
+	return CreateBuiltinVote(pContext, params);
+}
+
 cell_t DisplayBuiltinVote(IPluginContext *pContext, const cell_t *params)
 {
 	if (g_BuiltinVotes.IsVoteInProgress())

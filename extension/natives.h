@@ -109,6 +109,7 @@ public:
  **** NATIVE DEFINITIONS ***********
  ***********************************/
 cell_t CreateBuiltinVote(IPluginContext *pContext, const cell_t *params);
+cell_t CreateBuiltinVoteEx(IPluginContext* pContext, const cell_t* params);
 cell_t DisplayBuiltinVote(IPluginContext *pContext, const cell_t *params);
 cell_t AddBuiltinVoteItem(IPluginContext *pContext, const cell_t *params);
 cell_t InsertBuiltinVoteItem(IPluginContext *pContext, const cell_t *params);
@@ -145,6 +146,7 @@ cell_t Game_GetVoteTeam(IPluginContext *pContext, const cell_t *params);
 const sp_nativeinfo_t g_Natives[] =
 {
 	{"CreateBuiltinVote",				CreateBuiltinVote},
+	{"CreateBuiltinVoteEx",				CreateBuiltinVoteEx},
 	{"DisplayBuiltinVote",				DisplayBuiltinVote},
 	{"AddBuiltinVoteItem",				AddBuiltinVoteItem},
 	{"InsertBuiltinVoteItem",			InsertBuiltinVoteItem},

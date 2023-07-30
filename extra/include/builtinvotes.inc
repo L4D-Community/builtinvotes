@@ -232,11 +232,25 @@ typedef BuiltinVoteActionHandler = function void(Handle vote, BuiltinVoteAction 
  *							Cancel, and End will always be received regardless
  *							of whether they are set or not.  They are also
  *							the only default actions.
+ *
+ * @return					A new vote Handle or null if vote was not created.
+ */
+native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions = BUILTINVOTE_ACTIONS_DEFAULT);
+
+/**
+ * Creates a new, empty vote.
+ *
+ * @param handler			Function which will receive vote actions.
+ * @param voteType			Vote type, cannot be changed after set
+ * @param actions			Optionally set which actions to receive.  Start,
+ *							Cancel, and End will always be received regardless
+ *							of whether they are set or not.  They are also
+ *							the only default actions.
  * @param error				The reason why the vote was not created.
  *
  * @return					A new vote Handle or null if vote was not created.
  */
-native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions = BUILTINVOTE_ACTIONS_DEFAULT, eBuiltinVoteCreateError &error);
+native Handle CreateBuiltinVoteEx(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions = BUILTINVOTE_ACTIONS_DEFAULT, eBuiltinVoteCreateError &error);
 
 /**
  * Broadcasts a vote to a list of clients.  The most selected item will be
@@ -782,6 +796,7 @@ public Extension __ext_builtinvotes =
 public void __ext_builtinvotes_SetNTVOptional()
 {
 	MarkNativeAsOptional("CreateBuiltinVote");
+	MarkNativeAsOptional("CreateBuiltinVoteEx");
 	MarkNativeAsOptional("DisplayBuiltinVote");
 	MarkNativeAsOptional("AddBuiltinVoteItem");
 	MarkNativeAsOptional("InsertBuiltinVoteItem");
