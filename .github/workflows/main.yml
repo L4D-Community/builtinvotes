@@ -22,6 +22,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - ubuntu-20.04
           - windows-latest
           
         sm_version:
@@ -49,6 +50,9 @@ jobs:
           - sm_version: "1.11"
             sm_branch: "1.11-dev"
           
+          - os: ubuntu-20.04
+            os_short: oldlinux
+
           - os: ubuntu-latest
             os_short: linux
           
