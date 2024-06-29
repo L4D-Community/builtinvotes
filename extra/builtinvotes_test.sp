@@ -39,7 +39,7 @@ public Plugin myinfo =
 	name = "[L4D2] BuiltinVotes test",
 	author = "A1m`",
 	description = "Plugin to test the extension 'builtinvotes'",
-	version = "2.3",
+	version = "2.5",
 	url = "https://github.com/L4D-Community/builtinvotes"
 };
 
@@ -59,6 +59,23 @@ public void OnPluginStart()
 
 	RegAdminCmd("sm_bv_test", Cmd_BuiltinVotesTest, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_bv_close_data", Cmd_BuiltinVotesCloseData, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_getvotecontroller", Cmd_GetGameVoteController, ADMFLAG_GENERIC);
+}
+
+Action Cmd_GetGameVoteController(int iClient, int iArgs)
+{
+	int iEntIndex = Game_GetVoteController();
+	
+	char sEntityName[64];
+	FormatEx(sEntityName, sizeof(sEntityName), "Unknown entity");
+
+	if (iEntIndex > MaxClients && IsValidEntity(iEntIndex)) {
+		GetEntityClassname(iEntIndex, sEntityName, sizeof(sEntityName));
+	}
+
+	PrintToChat(iClient, "Entity name: %s, entity index: %d!", sEntityName, iEntIndex);
+
+	return Plugin_Handled;
 }
 
 public Action OnBuiltinVoteCreate(Handle hPlugin, const char[] sPluginName)
@@ -66,7 +83,7 @@ public Action OnBuiltinVoteCreate(Handle hPlugin, const char[] sPluginName)
 	PrintToChatAll("[OnBuiltinVoteCreate] hPlugin: %x, sPluginName: %s", hPlugin, sPluginName);
 
 	if (hPlugin != null) {
-		char sPlName[32], sPlAuthor[32], sPlDescription[64], sPlVersion[16], sPlUrl[32];
+		char sPlName[32], sPlAuthor[32], sPlDescription[64], sPlVersion[16], sPlUrl[256];
 		
 		GetPluginInfo(hPlugin, PlInfo_Name, sPlName, sizeof(sPlName));
 		GetPluginInfo(hPlugin, PlInfo_Author, sPlAuthor, sizeof(sPlAuthor));
@@ -78,7 +95,7 @@ public Action OnBuiltinVoteCreate(Handle hPlugin, const char[] sPluginName)
 		PrintToChatAll("[OnBuiltinVoteCreate] Plugin author: %s ", sPlAuthor);
 		PrintToChatAll("[OnBuiltinVoteCreate] Plugin description: %s ", sPlDescription);
 		PrintToChatAll("[OnBuiltinVoteCreate] Plugin version: %s ", sPlVersion);
-		PrintToChatAll("[OnBuiltinVoteCreate] Plugin Name: %s ", sPlUrl);
+		PrintToChatAll("[OnBuiltinVoteCreate] Plugin url: %s ", sPlUrl);
 		PrintToChatAll("[OnBuiltinVoteCreate] Plugin status: %d", GetPluginStatus(hPlugin));
 	}
 
@@ -99,7 +116,7 @@ public Action OnBuiltinVoteStart(Handle hVote, Handle hPlugin, const char[] sPlu
 	PrintToChatAll("[OnBuiltinVoteStart] Initiator: %s (%d), hPlugin: %x, sPluginName: %s", sInitiatorName, iInitiator, hPlugin, sPluginName);
 
 	if (hPlugin != null) {
-		char sPlName[32], sPlAuthor[32], sPlDescription[64], sPlVersion[16], sPlUrl[32];
+		char sPlName[32], sPlAuthor[32], sPlDescription[64], sPlVersion[16], sPlUrl[256];
 		
 		GetPluginInfo(hPlugin, PlInfo_Name, sPlName, sizeof(sPlName));
 		GetPluginInfo(hPlugin, PlInfo_Author, sPlAuthor, sizeof(sPlAuthor));
@@ -111,7 +128,7 @@ public Action OnBuiltinVoteStart(Handle hVote, Handle hPlugin, const char[] sPlu
 		PrintToChatAll("[OnBuiltinVoteStart] Plugin author: %s ", sPlAuthor);
 		PrintToChatAll("[OnBuiltinVoteStart] Plugin description: %s ", sPlDescription);
 		PrintToChatAll("[OnBuiltinVoteStart] Plugin version: %s ", sPlVersion);
-		PrintToChatAll("[OnBuiltinVoteStart] Plugin Name: %s ", sPlUrl);
+		PrintToChatAll("[OnBuiltinVoteStart] Plugin url: %s ", sPlUrl);
 		PrintToChatAll("[OnBuiltinVoteStart] Plugin status: %d", GetPluginStatus(hPlugin));
 	}
 
@@ -158,7 +175,7 @@ void StartBuiltinVote(const int iInitiator, bool bPassData = false)
 	}
 
 	eBuiltinVoteCreateError iError;
-	g_hVoteHandler = CreateBuiltinVote(VoteActionHandler, BuiltinVoteType_Custom_YesNo, BuiltinVoteAction_Cancel | BuiltinVoteAction_VoteEnd | BuiltinVoteAction_End, iError);
+	g_hVoteHandler = CreateBuiltinVoteEx(VoteActionHandler, BuiltinVoteType_Custom_YesNo, BuiltinVoteAction_Cancel | BuiltinVoteAction_VoteEnd | BuiltinVoteAction_End, iError);
 	if (g_hVoteHandler == null) {
 		PrintToChatAll("Failed to create vote. Reason %s (%d)!", g_sBuiltinVoteCreateError[iError], iError);
 		return;
@@ -186,7 +203,7 @@ void StartBuiltinVote(const int iInitiator, bool bPassData = false)
 	//FakeClientCommand(iInitiator, "Vote Yes");
 }
 
-int VoteActionHandler(Handle hVote, BuiltinVoteAction iAction, int iParam1, int iParam2)
+void VoteActionHandler(Handle hVote, BuiltinVoteAction iAction, int iParam1, int iParam2)
 {
 	switch (iAction) {
 		case BuiltinVoteAction_End: {

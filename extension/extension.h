@@ -186,4 +186,6 @@ extern IServerGameEnts *gameents;
 
 extern IForward* g_pCreateBVFwd;
 
+#include <compat_wrappers.h>
+
 #endif //_INCLUDE_SOURCEMOD_EXTENSION_PROPER_H_

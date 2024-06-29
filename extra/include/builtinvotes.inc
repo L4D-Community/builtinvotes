@@ -636,6 +636,13 @@ stock eVoteType GetVoteType_InProgress()
 }
 
 /**
+ * Return entity index 'CVoteController'
+ *
+ * @return int				-1 if 'CVoteController' not found, otherwise entity index
+ */
+native int Game_GetVoteController();
+
+/**
  * Retrieves voting information from BuiltinVoteAction_VoteEnd.
  *
  * @param param2		Second parameter of BuiltinVoteAction_VoteEnd.
@@ -825,5 +832,6 @@ public void __ext_builtinvotes_SetNTVOptional()
 	MarkNativeAsOptional("BuiltinVote_IsVoteInProgress");
 	MarkNativeAsOptional("Game_IsVoteInProgress");
 	MarkNativeAsOptional("Game_GetVoteTeam");
+	MarkNativeAsOptional("Game_GetVoteController");
 }
 #endif

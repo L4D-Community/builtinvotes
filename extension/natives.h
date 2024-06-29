@@ -142,6 +142,7 @@ cell_t DisplayBuiltinVoteFail(IPluginContext *pContext, const cell_t *params);
 cell_t BuiltinVote_IsVoteInProgress(IPluginContext *pContext, const cell_t *params);
 cell_t Game_IsVoteInProgress(IPluginContext *pContext, const cell_t *params);
 cell_t Game_GetVoteTeam(IPluginContext *pContext, const cell_t *params);
+cell_t Game_GetVoteController(IPluginContext* pContext, const cell_t* params);
 
 const sp_nativeinfo_t g_Natives[] =
 {
@@ -179,6 +180,7 @@ const sp_nativeinfo_t g_Natives[] =
 	{"BuiltinVote_IsVoteInProgress",	BuiltinVote_IsVoteInProgress},
 	{"Game_IsVoteInProgress",			Game_IsVoteInProgress},
 	{"Game_GetVoteTeam",				Game_GetVoteTeam},
+	{"Game_GetVoteController",			Game_GetVoteController},
 	{NULL,								NULL},
 };
 

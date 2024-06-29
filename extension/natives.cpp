@@ -1004,3 +1004,11 @@ cell_t Game_GetVoteTeam(IPluginContext *pContext, const cell_t *params)
 	return pContext->ThrowNativeError("This native is only available for left4dead2");
 #endif
 }
+
+cell_t Game_GetVoteController(IPluginContext* pContext, const cell_t* params)
+{
+	CBaseEntity* pVoteCotroller = (CBaseEntity*)CVoteController::GetVoteController();
+	cell_t iEntIndex = (pVoteCotroller != NULL) ? IndexOfEdict(gameents->BaseEntityToEdict(pVoteCotroller)) : -1;
+
+	return iEntIndex;
+}
