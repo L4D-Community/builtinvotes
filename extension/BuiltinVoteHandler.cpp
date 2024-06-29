@@ -304,6 +304,9 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 	m_fStartTime = gpGlobals->curtime;
 	m_nVoteTime = max_time;
 	m_TimeLeft = max_time;
+	
+	m_fVoteEndTime = gpGlobals->curtime + (float)max_time;
+	m_fNextDrawHitTime = gpGlobals->curtime + 1.0f;
 
 	unsigned int clientCount = 0;
 
@@ -392,11 +395,8 @@ bool BuiltinVoteHandler::RedrawToClient(int client, bool revotes)
 	//return m_pCurVote->Display(client);
 }
 
-bool BuiltinVoteHandler::InitializeVoting(IBaseBuiltinVote *vote,
-										  IBuiltinVoteHandler *handler,
-										  unsigned int time,
-										  unsigned int flags)
-
+bool BuiltinVoteHandler::InitializeVoting(IBaseBuiltinVote *vote, IBuiltinVoteHandler *handler,
+											unsigned int time, unsigned int flags)
 {
 	if (IsVoteInProgress())
 	{
@@ -452,7 +452,7 @@ void BuiltinVoteHandler::StartVoting()
 
 	m_pHandler->OnVoteStart(m_pCurVote);
 
-	m_displayTimer = timersys->CreateTimer(this, 1.0, NULL, TIMER_FLAG_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	ToggleFrameHook(true);
 
 	/* By now we know how many clients were set.
 	 * If there are none, we should end IMMEDIATELY.
@@ -499,11 +499,7 @@ void BuiltinVoteHandler::EndVoting()
 		g_next_vote = gpGlobals->curtime + fVoteDelay;
 	}
 
-	if (m_displayTimer)
-	{
-		timersys->KillTimer(m_displayTimer);
-		m_displayTimer = NULL;
-	}
+	ToggleFrameHook(false);
 
 	if (m_bCancelled)
 	{
@@ -715,11 +711,7 @@ void BuiltinVoteHandler::InternalReset()
 
 	m_TotalClients = 0;
 
-	if (m_displayTimer)
-	{
-		timersys->KillTimer(m_displayTimer);
-	}
-	m_displayTimer = NULL;
+	ToggleFrameHook(false);
 }
 
 void BuiltinVoteHandler::CancelVoting()
@@ -748,6 +740,21 @@ bool BuiltinVoteHandler::IsCancelling()
 bool BuiltinVoteHandler::WasCancelled()
 {
 	return m_bWasCancelled;
+}
+
+float BuiltinVoteHandler::GetNextDrawHitTime()
+{
+	return m_fNextDrawHitTime;
+}
+
+float BuiltinVoteHandler::GetVoteEndTime()
+{
+	return m_fVoteEndTime;
+}
+
+void BuiltinVoteHandler::SetNextDrawHitTime(float fNextDrawHitTime)
+{
+	m_fNextDrawHitTime = fNextDrawHitTime;
 }
 
 void BuiltinVoteHandler::DrawHintProgress()
@@ -826,26 +833,43 @@ void BuiltinVoteHandler::BuildVoteLeaders()
 	}
 }
 
-ResultType BuiltinVoteHandler::OnTimer(ITimer *pTimer, void *pData)
+void BuiltinVoteHandler::OnGameFrame(bool bSimulating)
 {
-	DrawHintProgress();
+	if (s_VoteHandler.GetNextDrawHitTime() <= gpGlobals->curtime) {
+		s_VoteHandler.DrawHintProgress();
+		s_VoteHandler.SetNextDrawHitTime(gpGlobals->curtime + 1.0f);
 
-	if (--m_TimeLeft == 0)
-	{
-		if (m_displayTimer != NULL)
-		{
-			m_displayTimer = NULL;
-			EndVoting();
-		}
-		return Pl_Stop;
+		Msg("DrawHintProgress""\n");
 	}
 
-	return Pl_Continue;
+	//Msg("GetVoteEndTime: %f, curtime: %f""\n", s_VoteHandler.GetVoteEndTime(), gpGlobals->curtime);
+
+	if (s_VoteHandler.GetVoteEndTime() <= gpGlobals->curtime) {
+		s_VoteHandler.EndVoting();
+
+		Msg("EndVoting""\n");
+	}
 }
 
-void BuiltinVoteHandler::OnTimerEnd(ITimer *pTimer, void *pData)
+void BuiltinVoteHandler::ToggleFrameHook(bool bEnableHook)
 {
-	m_displayTimer = NULL;
+	if (bEnableHook) {
+		if (!m_bFrameHookEnabled) {
+			smutils->AddGameFrameHook(BuiltinVoteHandler::OnGameFrame);
+
+			Msg("Add 'GameFrame' hook""\n");
+			m_bFrameHookEnabled = true;
+		}
+
+		return;
+	}
+
+	if (m_bFrameHookEnabled) {
+		smutils->RemoveGameFrameHook(BuiltinVoteHandler::OnGameFrame);
+
+		Msg("Remove 'GameFrame' hook""\n");
+		m_bFrameHookEnabled = false;
+	}
 }
 
 RedrawTimer::RedrawTimer(int client, IBaseBuiltinVote *vote) :

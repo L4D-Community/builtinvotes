@@ -65,8 +65,7 @@ private:
 
 class BuiltinVoteHandler :
 	public IBuiltinVoteHandler,
-	public IClientListener,
-	public ITimedEvent
+	public IClientListener
 {
 public: //SMGlobalClass (faked from extension.cpp)
 	void OnLoad();
@@ -80,10 +79,10 @@ public: //IBuiltinVoteHandler
 	//void OnVoteDisplay(IBaseBuiltinVote *vote, int client);
 	void OnVoteSelect(IBaseBuiltinVote *vote, int client, unsigned int item);
 	//void OnVoteEnd(IBaseBuiltinVote *vote, BuiltinVoteEndReason reason);
-public: //ITimedEvent
-	ResultType OnTimer(ITimer *pTimer, void *pData);
-	void OnTimerEnd(ITimer *pTimer, void *pData);
 public:
+	static void OnGameFrame(bool bSimulating);
+	void ToggleFrameHook(bool bEnable);
+	
 	bool StartVote(IBaseBuiltinVote *vote,
 		unsigned int num_clients,
 		int clients[],
@@ -98,6 +97,9 @@ public:
 	bool IsClientInVotePool(int client);
 	bool GetClientVoteChoice(int client, unsigned int *pItem);
 	bool RedrawToClient(int client, bool revote);
+	float GetNextDrawHitTime();
+	float GetVoteEndTime();
+	void SetNextDrawHitTime(float fVoteEndTime);
 private:
 	void Reset(IBuiltinVoteHandler *vh);
 	void DecrementPlayerCount();
@@ -129,7 +131,9 @@ private:
 	int m_ClientVotes[256+1];
 	bool m_Revoting[256+1];
 	char m_leaderList[1024];
-	ITimer *m_displayTimer;
+	bool m_bFrameHookEnabled = false;
+	float m_fVoteEndTime = 0.0f;
+	float m_fNextDrawHitTime = 0.0f;
 };
 
 
