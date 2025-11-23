@@ -7,6 +7,7 @@ Last updates:
 5) Add Native Game_GetVoteTeam() for game left4dead2.
 6) Infinite voting fix: if there is an wrong code in the plugin and the sourcemod interrupts the execution of the code or the plugin author forgot to add DisplayVoteFail or DisplayVotePass, then the voting table will be endlessly shown to the players. Now the extension will do it on its own and send the players that the vote failed. The fix is primarily made for the game left4dead2.
 7) Fix vote handler to work with direct arrays for updated sourcepawn (sourcemod 1.11).
+8) Added the ability to add your data to the callback after a successful vote.
 
 BuiltinVotes by Powerlord
 ==============
