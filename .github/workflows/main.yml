@@ -22,31 +22,39 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - ubuntu-20.04
+          - ubuntu-22.04
           - windows-latest
           
         sm_version:
+          - "1.9"
           - "1.10"
           - "1.11"
+          - "1.12"
           - "latest"
           
         include:
-          # Use MM:Source 1.11 as base version
-          - meta_version: "1.11"
-            meta_branch: "1.11-dev"
-            
-          - sm_version: latest
-            sm_branch: master
-            meta_version: latest
-            meta_branch: master
-          
+          # Use MM:Source 1.12 as base version
+          - meta_version: "1.12"
+            meta_branch: "1.12-dev"
+
+          - sm_version: "1.9"
+            sm_branch: "1.9-dev"
+
           - sm_version: "1.10"
             sm_branch: "1.10-dev"
           
           - sm_version: "1.11"
             sm_branch: "1.11-dev"
-          
-          - os: ubuntu-20.04
+
+          - sm_version: "1.12"
+            sm_branch: "1.12-dev"
+
+          - sm_version: latest
+            sm_branch: master
+            meta_version: latest
+            meta_branch: master
+
+          - os: ubuntu-22.04
             os_short: oldlinux
 
           - os: ubuntu-latest
