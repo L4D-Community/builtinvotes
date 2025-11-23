@@ -40,6 +40,8 @@
 	#endinput
 #endif
 
+/* Source: https://github.com/L4D-Community/builtinvotes/blob/master/extra/include/builtinvotes_stocks.inc */
+
 enum eVoteType
 {
 	eVoteNone = -1,

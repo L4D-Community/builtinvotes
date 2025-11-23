@@ -32,10 +32,11 @@ CopyFiles('extra', 'addons/sourcemod/scripting',
   [ 'builtinvotes_test.sp' ]
 )
 
-# Include file
+# Include files
 CopyFiles('extra/include', 'addons/sourcemod/scripting/include',
- [ 'builtinvotes.inc', 
-   'builtinvotes/builtinvotes_stocks.inc',
+ [ 
+   'builtinvotes.inc',
+   'builtinvotes_stocks.inc',
  ]
 )
 

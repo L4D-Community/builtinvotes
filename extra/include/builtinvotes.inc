@@ -35,9 +35,9 @@
 #endif
 #define _builtinvotes_included
 
-#include "builtinvotes/builtinvotes_stocks.inc"
+#include "builtinvotes_stocks.inc"
 
-/* Version from here - https://github.com/A1mDev/builtinvotes/blob/master/sourcemod/scripting/include/builtinvotes.inc */
+/* Source: https://github.com/L4D-Community/builtinvotes/blob/master/extra/include/builtinvotes.inc */
 
 #define BUILTINVOTES_EXTEND 			"Extend current Map" /** Defined in TF2, but doesn't appear to be localized */
 
