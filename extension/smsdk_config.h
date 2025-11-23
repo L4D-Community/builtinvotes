@@ -40,9 +40,9 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"Builtin Votes"
 #define SMEXT_CONF_DESCRIPTION	"API to do votes using the L4D, L4D2, and Orange Box Valve game in-game vote interface"
-#define SMEXT_CONF_VERSION		"0.7.0"
+#define SMEXT_CONF_VERSION		"0.7.1"
 #define SMEXT_CONF_AUTHOR		"Powerlord, A1m`"
-#define SMEXT_CONF_URL			"https://forums.alliedmods.net/showthread.php?t=162164"
+#define SMEXT_CONF_URL			"https://github.com/L4D-Community/builtinvotes"
 #define SMEXT_CONF_LOGTAG		"BVOTE"
 #define SMEXT_CONF_LICENSE		"GPL"
 #define SMEXT_CONF_DATESTRING	__DATE__
