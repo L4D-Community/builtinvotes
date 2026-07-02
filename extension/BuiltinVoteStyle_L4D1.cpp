@@ -141,6 +141,11 @@ bool CL4D1BuiltinVote::Display(int clients[], unsigned int num_clients)
 
 	IGameEvent *startEvent = events->CreateEvent("vote_started");
 
+	if (startEvent == NULL) {
+		g_pSM->LogError(myself, "Display: Could not create 'vote_started' event (map change?)");
+		return false;
+	}
+
 	startEvent->SetInt("team", m_team);
 	startEvent->SetInt("initiator", m_initiator);
 	startEvent->SetString("issue", translation);
@@ -169,7 +174,12 @@ void CL4D1BuiltinVote::Cancel_Finally()
 void CL4D1BuiltinVote::VoteEnded()
 {
 	IGameEvent *endEvent = events->CreateEvent("vote_ended");
-	events->FireEvent(endEvent);
+
+	if (endEvent != NULL) {
+		events->FireEvent(endEvent);
+	} else {
+		g_pSM->LogError(myself, "VoteEnded: Could not create 'vote_ended' event (map change?)");
+	}
 }
 
 void CL4D1BuiltinVote::DisplayVotePass(const char *winner)
@@ -221,12 +231,15 @@ void CL4D1BuiltinVote::DisplayVotePass(const char *translation, const char* winn
 	VoteEnded();
 
 	IGameEvent *passEvent = events->CreateEvent("vote_passed");
+	if (passEvent != NULL) {
+		passEvent->SetString("details", translation);
+		passEvent->SetString("param1", winner);
+		passEvent->SetInt("team", m_team);
 
-	passEvent->SetString("details", translation);
-	passEvent->SetString("param1", winner);
-	passEvent->SetInt("team", m_team);
-
-	events->FireEvent(passEvent);
+		events->FireEvent(passEvent);
+	} else {
+		g_pSM->LogError(myself, "DisplayVotePass: Could not create 'vote_passed' event (map change?)");
+	}
 }
 
 void CL4D1BuiltinVote::DisplayVoteFail(BuiltinVoteFailReason reason)
@@ -238,11 +251,14 @@ void CL4D1BuiltinVote::DisplayVoteFail(BuiltinVoteFailReason reason)
 
 	VoteEnded();
 
-	IGameEvent *failEvent = events->CreateEvent("vote_failed");
+	IGameEvent* failEvent = events->CreateEvent("vote_failed");
+	if (failEvent != NULL) {
+		failEvent->SetInt("team", m_team);
 
-	failEvent->SetInt("team", m_team);
-
-	events->FireEvent(failEvent);
+		events->FireEvent(failEvent);
+	} else {
+		g_pSM->LogError(myself, "DisplayVoteFail: Could not create 'vote_failed' event (map change?)");
+	}
 }
 
 void CL4D1BuiltinVote::DisplayVoteFail(int client, BuiltinVoteFailReason reason)

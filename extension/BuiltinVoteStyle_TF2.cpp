@@ -134,24 +134,29 @@ bool CTF2BuiltinVote::Display(int clients[], unsigned int num_clients)
 	// Send options if they haven't been sent yet.
 	if (!m_bOptionsSent)
 	{
-		const char *prefix = "option";
+		const char* prefix = "option";
 
-		IGameEvent *optionsEvent = events->CreateEvent("vote_options");
+		IGameEvent* optionsEvent = events->CreateEvent("vote_options");
+		if (optionsEvent != NULL) {
+			unsigned int maxCount = GetItemCount();
 
-		unsigned int maxCount = GetItemCount();
-		for (unsigned int i=0; i < maxCount; i++)
-		{
-			char option[7+1];
-			// I hate string concatenation in C/C++
-			snprintf(option, sizeof(option), "%s%d", prefix, i+1);
+			for (unsigned int i = 0; i < maxCount; i++) {
+				char option[7 + 1];
+				// I hate string concatenation in C/C++
+				snprintf(option, sizeof(option), "%s%d", prefix, i + 1);
 
-			const char *display;
-			display = GetItemDisplay(i);
-			optionsEvent->SetString(option, display);
+				const char* display;
+				display = GetItemDisplay(i);
+				optionsEvent->SetString(option, display);
+			}
+
+			optionsEvent->SetInt("count", maxCount);
+
+			events->FireEvent(optionsEvent);
+		} else {
+			g_pSM->LogError(myself, "Display: Could not create 'vote_options' event (map change?)");
 		}
-		optionsEvent->SetInt("count", maxCount);
 
-		events->FireEvent(optionsEvent);
 		m_bOptionsSent = true;
 	}
 
@@ -367,12 +372,14 @@ void CTF2BuiltinVote::ClientSelectedItem(int client, unsigned int item)
 
 	//Fire the vote_cast event
 	IGameEvent *castEvent = events->CreateEvent("vote_cast");
-
-	castEvent->SetInt("team", GetTeam());
-	castEvent->SetInt("entityid", client);
-	castEvent->SetInt("vote_option", item);
-
-	events->FireEvent(castEvent);
+	if (castEvent != NULL) {
+		castEvent->SetInt("team", GetTeam());
+		castEvent->SetInt("entityid", client);
+		castEvent->SetInt("vote_option", item);
+		events->FireEvent(castEvent);
+	} else {
+		g_pSM->LogError(myself, "ClientSelectedItem: Could not create 'vote_cast' event (map change?)");
+	}
 
 	//CBaseBuiltinVote::ClientPressedKey(client, key_press);
 	//s_VoteHandler.OnVoteSelect(this, client, item);

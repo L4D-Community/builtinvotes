@@ -46,15 +46,17 @@ CBaseBuiltinVote(pHandler, pStyle, type, pOwner)
 
 bool CL4DBaseBuiltinVote::UpdateVoteCounts(unsigned int items, CVector<unsigned int> votes, unsigned int totalClients)
 {
-	IGameEvent *changeEvent = events->CreateEvent("vote_changed");
+	IGameEvent* changeEvent = events->CreateEvent("vote_changed");
+	if (changeEvent != NULL) {
+		changeEvent->SetInt("yesVotes", votes.at(BUILTINVOTES_VOTE_YES));
+		changeEvent->SetInt("noVotes", votes.at(BUILTINVOTES_VOTE_NO));
+		changeEvent->SetInt("potentialVotes", totalClients);
 
-	changeEvent->SetInt("yesVotes", votes.at(BUILTINVOTES_VOTE_YES));
-	changeEvent->SetInt("noVotes", votes.at(BUILTINVOTES_VOTE_NO));
-	changeEvent->SetInt("potentialVotes", totalClients);
+		events->FireEvent(changeEvent);
+		return true;
+	}
 
-	events->FireEvent(changeEvent);
-
-	return true;
+	return false;
 }
 
 void CL4DBaseBuiltinVote::OnClientCommand(edict_t *pEntity, const CCommand &cmd)
