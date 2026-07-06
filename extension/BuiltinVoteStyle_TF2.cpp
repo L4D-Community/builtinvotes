@@ -154,7 +154,7 @@ bool CTF2BuiltinVote::Display(int clients[], unsigned int num_clients)
 
 			events->FireEvent(optionsEvent);
 		} else {
-			g_pSM->LogError(myself, "Display: Could not create 'vote_options' event (map change?)");
+			g_pSM->LogError(myself, "Display: Could not create 'vote_options' event");
 		}
 
 		m_bOptionsSent = true;
@@ -378,7 +378,7 @@ void CTF2BuiltinVote::ClientSelectedItem(int client, unsigned int item)
 		castEvent->SetInt("vote_option", item);
 		events->FireEvent(castEvent);
 	} else {
-		g_pSM->LogError(myself, "ClientSelectedItem: Could not create 'vote_cast' event (map change?)");
+		g_pSM->LogError(myself, "ClientSelectedItem: Could not create 'vote_cast' event");
 	}
 
 	//CBaseBuiltinVote::ClientPressedKey(client, key_press);

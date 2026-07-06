@@ -142,7 +142,7 @@ bool CL4D1BuiltinVote::Display(int clients[], unsigned int num_clients)
 	IGameEvent *startEvent = events->CreateEvent("vote_started");
 
 	if (startEvent == NULL) {
-		g_pSM->LogError(myself, "Display: Could not create 'vote_started' event (map change?)");
+		g_pSM->LogError(myself, "Display: Could not create 'vote_started' event");
 		return false;
 	}
 
@@ -178,7 +178,7 @@ void CL4D1BuiltinVote::VoteEnded()
 	if (endEvent != NULL) {
 		events->FireEvent(endEvent);
 	} else {
-		g_pSM->LogError(myself, "VoteEnded: Could not create 'vote_ended' event (map change?)");
+		g_pSM->LogError(myself, "VoteEnded: Could not create 'vote_ended' event");
 	}
 }
 
@@ -238,7 +238,7 @@ void CL4D1BuiltinVote::DisplayVotePass(const char *translation, const char* winn
 
 		events->FireEvent(passEvent);
 	} else {
-		g_pSM->LogError(myself, "DisplayVotePass: Could not create 'vote_passed' event (map change?)");
+		g_pSM->LogError(myself, "DisplayVotePass: Could not create 'vote_passed' event");
 	}
 }
 
@@ -257,7 +257,7 @@ void CL4D1BuiltinVote::DisplayVoteFail(BuiltinVoteFailReason reason)
 
 		events->FireEvent(failEvent);
 	} else {
-		g_pSM->LogError(myself, "DisplayVoteFail: Could not create 'vote_failed' event (map change?)");
+		g_pSM->LogError(myself, "DisplayVoteFail: Could not create 'vote_failed' event");
 	}
 }
 

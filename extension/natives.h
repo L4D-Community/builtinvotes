@@ -60,7 +60,7 @@ class VoteNativeHelpers
 public:
 	virtual void OnLoad();
 	virtual void OnUnload();
-	CBuiltinVoteHandler *GetVoteHandler(IPluginFunction *pFunction, int flags, const char *pPlName);
+	CBuiltinVoteHandler *GetVoteHandler(IPluginFunction *pFunction, int flags, const char *pPlName, Handle_t hPlugin);
 	void FreeVoteHandler(CBuiltinVoteHandler *handler);
 private:
 	CStack<CBuiltinVoteHandler *> m_FreeVoteHandlers;
@@ -70,7 +70,7 @@ class CBuiltinVoteHandler : public IBuiltinVoteHandler
 {
 	friend class VoteNativeHelpers;
 public:
-	CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char* sPlName = nullptr);
+	CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char* sPlName = nullptr, Handle_t hPlugin = BAD_HANDLE);
 public:
 	void OnVoteStart(IBaseBuiltinVote *vote);
 	//void OnVoteDisplay(IBaseBuiltinVote *vote, int client);
@@ -82,6 +82,7 @@ public:
 	void OnVoteCancel(IBaseBuiltinVote *vote, BuiltinVoteFailReason reason);
 	bool OnSetHandlerOption(const char *option, const void *data, int iUserData, int iUserDataFlags, IdentityToken_t* pToken);
 	void CloseHandleUserData();
+	void SetVoteResultsPluginHandle(Handle_t hPlugin);
 
 	Handle_t GetBuiltinVotePluginHandle();
 	const char* GetBuiltinVotePluginName();
@@ -89,8 +90,11 @@ private:
 	cell_t DoAction(IBaseBuiltinVote *vote, BuiltinVoteAction action, cell_t param1, cell_t param2, cell_t def_res=0);
 private:
 	IPluginFunction *m_pBasic;
+	Handle_t m_hPlugin;
 	int m_Flags;
+
 	IPluginFunction *m_pVoteResults;
+	Handle_t m_hVoteResultsPlugin;
 	cell_t m_fnVoteResult;
 
 	cell_t m_iUserData;

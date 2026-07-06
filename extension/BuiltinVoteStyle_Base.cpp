@@ -440,6 +440,12 @@ void CBaseBuiltinVote::Destroy(bool releaseHandle)
 		return;
 	}
 
+	// If we never send the voting results panel, then the voting panel will be shown to players indefinitely.
+	// For game Left4Dead2, not tested in other games.
+	if (m_bSendGameVotePanel && !m_bResultDisplayed) {
+		DisplayVoteFail(BuiltinVoteFail_Generic);
+	}
+
 	/* Save the destruction hint about our handle */
 	m_bWillFreeHandle = releaseHandle;
 

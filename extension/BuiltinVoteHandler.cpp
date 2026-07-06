@@ -252,13 +252,14 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 		return false;
 	}
 
+	m_hVoteHandle = vote->GetHandle();
+
 	if (g_pStartBVFwd->GetFunctionCount() > 0)
 	{
 		cell_t iPlRetValue = Pl_Continue;
 		IBuiltinVoteHandler *pVoteHandler = vote->GetHandler();
-		Handle_t hVoteHandle = vote->GetHandle();
 
-		g_pStartBVFwd->PushCell(hVoteHandle);
+		g_pStartBVFwd->PushCell(m_hVoteHandle);
 		g_pStartBVFwd->PushCell(pVoteHandler->GetBuiltinVotePluginHandle());
 		g_pStartBVFwd->PushString(pVoteHandler->GetBuiltinVotePluginName());
 		g_pStartBVFwd->Execute(&iPlRetValue);
@@ -274,7 +275,7 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 			// Let's try to get a pointer to class 'IBaseBuiltinVote' again, 
 			// maybe we already deleted it in function 'OnHandleDestroy', or the plugin called the 'delete' or 'CloseHandle' method, 
 			// if we try to delete it again, we'll get a crash.
-			if (g_BuiltinVotes.ReadVoteHandle(hVoteHandle, &vote) == HandleError_None)
+			if (g_BuiltinVotes.ReadVoteHandle(m_hVoteHandle, &vote) == HandleError_None)
 			{
 				vote->Destroy(true);
 			}
@@ -321,7 +322,6 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 	}
 
 	m_Clients = clientCount;
-
 	m_pCurVote->UpdateVoteCounts(m_Items, m_Votes, clientCount); // Same thing as BuildVoteLeaders, but for L4D/L4D2 internals
 
 	vote->GetDrawStyle()->DoClientVote(clients, num_clients, vote, vote->GetHandler());
@@ -452,7 +452,7 @@ void BuiltinVoteHandler::StartVoting()
 
 	m_pHandler->OnVoteStart(m_pCurVote);
 
-	m_displayTimer = timersys->CreateTimer(this, 1.0, NULL, TIMER_FLAG_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	m_displayTimer = timersys->CreateTimer(this, 1.0, NULL, TIMER_FLAG_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
 	/* By now we know how many clients were set.
 	 * If there are none, we should end IMMEDIATELY.
@@ -483,8 +483,31 @@ int SortVoteItems(const void *item1, const void *item2)
 		- ((menu_vote_result_t::menu_item_vote_t *)item1)->count;
 }
 
+bool BuiltinVoteHandler::IsValidVote()
+{
+	if (m_hVoteHandle == BAD_HANDLE) {
+		return false;
+	}
+	
+	IBaseBuiltinVote* vote = nullptr;
+	HandleError errVote = g_BuiltinVotes.ReadVoteHandle(m_hVoteHandle, &vote);
+
+	if (errVote != HandleError_None || !vote || m_hVoteHandle != vote->GetHandle()) {
+		g_pSM->LogError(myself, "EndVoting: Vote object invalid (handle %x)", m_hVoteHandle);
+
+		return false;
+	}
+	
+	return true;
+}
+
 void BuiltinVoteHandler::EndVoting()
 {
+	if (!IsValidVote()) {
+		InternalReset();
+		return;
+	}
+
 	/* Set when the next delay ends.  We ignore cancellation because a vote
 	 * was, at one point, displayed, which is all that counts.  However, we
 	 * do recalculate the time just in case the vote had no time limit.
@@ -701,6 +724,7 @@ void BuiltinVoteHandler::OnVoteSelect(IBaseBuiltinVote *vote, int client, unsign
 
 void BuiltinVoteHandler::InternalReset()
 {
+	m_hVoteHandle = BAD_HANDLE;
 	m_Clients = 0;
 	m_Items = 0;
 	m_bStarted = false;
@@ -728,6 +752,7 @@ void BuiltinVoteHandler::CancelVoting()
 	{
 		return;
 	}
+
 	m_bCancelled = true;
 	m_bWasCancelled = true;
 

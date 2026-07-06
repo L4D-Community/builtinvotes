@@ -53,13 +53,13 @@ void VoteNativeHelpers::OnUnload()
 	}
 }
 
-CBuiltinVoteHandler *VoteNativeHelpers::GetVoteHandler(IPluginFunction *pFunction, int flags, const char* pPlName)
+CBuiltinVoteHandler *VoteNativeHelpers::GetVoteHandler(IPluginFunction *pFunction, int flags, const char* pPlName, Handle_t hPlugin)
 {
 	CBuiltinVoteHandler *handler = nullptr;
 
 	if (m_FreeVoteHandlers.empty())
 	{
-		handler = new CBuiltinVoteHandler(pFunction, flags, pPlName);
+		handler = new CBuiltinVoteHandler(pFunction, flags, pPlName, hPlugin);
 		return handler;
 	}
 
@@ -83,8 +83,9 @@ void VoteNativeHelpers::FreeVoteHandler(CBuiltinVoteHandler *handler)
 /**
  * VOTE HANDLER WRAPPER
  */
-CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char *pPlName) :
-	m_pBasic(pBasic), m_Flags(flags), m_pVoteResults(NULL), m_iUserData(0), m_iUserDataFlags(0), m_pOwner(NULL)
+CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char *pPlName, Handle_t hPlugin) :
+	m_pBasic(pBasic), m_Flags(flags), m_pVoteResults(NULL), m_iUserData(0), m_iUserDataFlags(0), m_pOwner(NULL),
+	m_hPlugin(hPlugin), m_hVoteResultsPlugin(BAD_HANDLE)
 {
 	strncpy(m_sPluginName, pPlName, sizeof(m_sPluginName));
 	/* :TODO: We can probably cache this ahead of time */
@@ -107,6 +108,11 @@ void CBuiltinVoteHandler::OnVoteDisplay(IBaseBuiltinVote *vote, int client)
 	}
 }
 */
+
+void CBuiltinVoteHandler::SetVoteResultsPluginHandle(Handle_t hPlugin)
+{
+	m_hVoteResultsPlugin = hPlugin;
+}
 
 void CBuiltinVoteHandler::OnVoteSelect(IBaseBuiltinVote *vote, int client, unsigned int item)
 {
@@ -148,21 +154,43 @@ void CBuiltinVoteHandler::OnVoteCancel(IBaseBuiltinVote *vote, BuiltinVoteFailRe
 	DoAction(vote, BuiltinVoteAction_Cancel, reason, 0);
 }
 
-cell_t CBuiltinVoteHandler::DoAction(IBaseBuiltinVote *vote, BuiltinVoteAction action, cell_t param1, cell_t param2, cell_t def_res)
+cell_t CBuiltinVoteHandler::DoAction(IBaseBuiltinVote* vote, BuiltinVoteAction action, cell_t param1, cell_t param2, cell_t def_res)
 {
+	if (!m_pBasic) {
+		g_pSM->LogError(myself, "DoAction: m_pBasic is null!");
+		return def_res;
+	}
+
+	HandleError plError;
+	IPlugin* plugin = plsys->PluginFromHandle(m_hPlugin, &plError);
+	if (plError != HandleError_None || !plugin || plugin->GetStatus() != Plugin_Running) {
+		g_pSM->LogError(myself, "DoAction: Plugin is not running (handle %x)", m_hPlugin);
+		return def_res;
+	}
+
 	cell_t res = def_res;
 	m_pBasic->PushCell(vote->GetHandle());
 	m_pBasic->PushCell((cell_t)action);
 	m_pBasic->PushCell(param1);
 	m_pBasic->PushCell(param2);
 	m_pBasic->Execute(&res);
+
 	return res;
 }
 
 void CBuiltinVoteHandler::OnVoteResults(IBaseBuiltinVote *vote, const menu_vote_result_t *results)
 {
-	if (!m_pVoteResults)
-	{
+	if (m_pVoteResults != NULL) {
+		HandleError plErr;
+		IPlugin* plugin = plsys->PluginFromHandle(m_hVoteResultsPlugin, &plErr);
+
+		if (plErr != HandleError_None || !plugin || plugin->GetStatus() != Plugin_Running) {
+			g_pSM->LogError(myself, "OnVoteResults: Results callback plugin unavailable (handle %x)", m_hVoteResultsPlugin);
+			m_pVoteResults = NULL;
+		}
+	}
+
+	if (m_pVoteResults == NULL) {
 		/* Call VoteAction_VoteEnd instead.  See if there are any extra winners. */
 		unsigned int num_items = 1;
 		for (unsigned int i=1; i<results->num_items; i++)
@@ -394,15 +422,7 @@ void CBuiltinVoteHandler::CloseHandleUserData()
 
 Handle_t CBuiltinVoteHandler::GetBuiltinVotePluginHandle()
 {
-	if (m_pBasic == nullptr)
-	{
-		return 0;
-	}
-
-	sp_context_t *pCtx_t = m_pBasic->GetParentContext()->GetContext();
-	IPlugin* pPlugin = plsys->FindPluginByContext(pCtx_t);
-
-	return pPlugin->GetMyHandle();
+	return m_hPlugin;
 }
 
 const char* CBuiltinVoteHandler::GetBuiltinVotePluginName()
@@ -425,6 +445,7 @@ cell_t CreateBuiltinVote(IPluginContext *pContext, const cell_t *params)
 	}
 
 	IPlugin* pPlugin = plsys->FindPluginByContext(pContext->GetContext());
+	Handle_t hPlugin = pPlugin->GetMyHandle();
 	const char *sPlName = pPlugin->GetFilename();
 
 	// Check if this parameter has been passed for backwards compatibility with plugins built on the old include.
@@ -455,7 +476,7 @@ cell_t CreateBuiltinVote(IPluginContext *pContext, const cell_t *params)
 		}
 	}
 
-	CBuiltinVoteHandler *handler = g_VoteHelpers.GetVoteHandler(pFunction, params[3], sPlName);
+	CBuiltinVoteHandler *handler = g_VoteHelpers.GetVoteHandler(pFunction, params[3], sPlName, hPlugin);
 	BuiltinVoteType type = (BuiltinVoteType)params[2];
 
 	IBaseBuiltinVote *vote = style->CreateVote(handler, type, pContext->GetIdentity());
@@ -785,8 +806,13 @@ cell_t SetBuiltinVoteResultCallback(IPluginContext *pContext, const cell_t *para
 		return pContext->ThrowNativeError("The given vote does not support this option");
 	}
 
-	return 1;
+	IPlugin* pPlugin = plsys->FindPluginByContext(pContext->GetContext());
+	if (pPlugin) {
+		CBuiltinVoteHandler* pBuiltinHandler = static_cast<CBuiltinVoteHandler*>(pHandler);
+		pBuiltinHandler->SetVoteResultsPluginHandle(pPlugin->GetMyHandle());
+	}
 
+	return 1;
 }
 
 cell_t CheckBuiltinVoteDelay(IPluginContext *pContext, const cell_t *params)

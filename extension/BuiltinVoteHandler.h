@@ -110,6 +110,8 @@ private:
 	void StartVoting();
 	void DrawHintProgress();
 	void BuildVoteLeaders();
+	bool IsValidVote();
+
 private:
 	IBuiltinVoteHandler *m_pHandler;
 	unsigned int m_Clients;
@@ -130,6 +132,7 @@ private:
 	bool m_Revoting[256+1];
 	char m_leaderList[1024];
 	ITimer *m_displayTimer;
+	Handle_t m_hVoteHandle;
 };
 
 

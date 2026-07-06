@@ -136,6 +136,8 @@ public:
 	 * @param clientMax		Maximum number of clients allowed in the server.
 	 */
 	virtual void OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax);
+
+	//virtual void OnCoreMapEnd();
 #endif
 
 public:  // IConCommandBaseAccessor
