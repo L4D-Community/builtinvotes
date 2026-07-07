@@ -494,7 +494,7 @@ namespace SourceMod
 		 *
 		 * @return				True if shown otherwise false.
 		 */
-		virtual bool IsGameVotePanelDisplayed() = 0;
+		virtual bool IsGameVotePanelDisplayed() =0;
 	};
 
 
