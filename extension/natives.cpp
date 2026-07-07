@@ -84,13 +84,18 @@ void VoteNativeHelpers::FreeVoteHandler(CBuiltinVoteHandler *handler)
  * VOTE HANDLER WRAPPER
  */
 CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char *pPlName, Handle_t hPlugin) :
-	m_pBasic(pBasic), m_Flags(flags), m_pVoteResults(NULL), m_iUserData(0), m_iUserDataFlags(0), m_pOwner(NULL),
-	m_hPlugin(hPlugin), m_hVoteResultsPlugin(BAD_HANDLE)
+	m_pBasic(pBasic),
+	m_hPlugin(hPlugin),
+	m_Flags(flags),
+	m_pVoteResults(NULL),
+	m_hVoteResultsPlugin(BAD_HANDLE),
+	m_fnVoteResult(0),
+	m_iUserData(0),
+	m_iUserDataFlags(0),
+	m_pOwner(NULL)
 {
 	strncpy(m_sPluginName, pPlName, sizeof(m_sPluginName));
-	/* :TODO: We can probably cache this ahead of time */
 }
-
 /*
 void CBuiltinVoteHandler::OnVoteStart(IBaseBuiltinVote *vote)
 {
