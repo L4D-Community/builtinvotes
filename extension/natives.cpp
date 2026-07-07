@@ -35,8 +35,14 @@
 // Hotfix: Removed macro in sourcemod 1.13
 // Ensure we use SourcePawn API v0.0213+ for HeapAlloc2dArray/HeapAlloc2dArray
 // and to avoid missing method errors on older SourceMod builds.
+// Helper to get sp_context_t* from IPluginContext* without relying on missing methods
 #ifndef SOURCEPAWN_API_VERSION
+	// sm-1.13+
 	#define SOURCEPAWN_API_VERSION 0x0213
+	#define GET_PLUGIN_CONTEXT(pCtx) ((pCtx))
+#else
+	// sm-1.9, sm-1.10, sm-1.11, sm-1.12
+	#define GET_PLUGIN_CONTEXT(pCtx) ((pCtx)->GetContext())
 #endif
 
 VoteNativeHelpers g_VoteHelpers;
@@ -456,7 +462,7 @@ cell_t CreateBuiltinVote(IPluginContext *pContext, const cell_t *params)
 		return pContext->ThrowNativeError("Function id %x is invalid", params[1]);
 	}
 
-	IPlugin* pPlugin = plsys->FindPluginByContext(pContext);
+	IPlugin* pPlugin = plsys->FindPluginByContext(GET_PLUGIN_CONTEXT(pContext));
 	Handle_t hPlugin = pPlugin->GetMyHandle();
 	const char *sPlName = pPlugin->GetFilename();
 
@@ -818,7 +824,7 @@ cell_t SetBuiltinVoteResultCallback(IPluginContext *pContext, const cell_t *para
 		return pContext->ThrowNativeError("The given vote does not support this option");
 	}
 
-	IPlugin* pPlugin = plsys->FindPluginByContext(pContext);
+	IPlugin* pPlugin = plsys->FindPluginByContext(GET_PLUGIN_CONTEXT(pContext));
 	if (pPlugin) {
 		CBuiltinVoteHandler* pBuiltinHandler = static_cast<CBuiltinVoteHandler*>(pHandler);
 		pBuiltinHandler->SetVoteResultsPluginHandle(pPlugin->GetMyHandle());
