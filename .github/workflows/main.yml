@@ -54,8 +54,8 @@ jobs:
 
           - sm_version: latest
             sm_branch: master
-            meta_version: latest
-            meta_branch: master
+            meta_version: "1.12"
+            meta_branch: "1.12-dev"
 
           - os: ubuntu-22.04
             os_short: oldlinux
@@ -113,7 +113,8 @@ jobs:
           repository: alliedmodders/metamod-source
           ref: ${{ matrix.meta_branch }}
           path: metamod-${{ matrix.meta_version }}
-          
+          submodules: recursive
+
       - name: Getting AMBuild
         uses: actions/checkout@v4
         with:

@@ -73,10 +73,8 @@ IBaseBuiltinVote *TF2BuiltinVoteStyle::CreateVote(IBuiltinVoteHandler *handler, 
 	{
 		return new CTF2BuiltinVote(handler, this, type, pOwner);
 	}
-	else
-	{
-		return NULL;
-	}
+
+	return NULL;
 }
 
 const char *TF2BuiltinVoteStyle::GetStyleName()
@@ -390,7 +388,7 @@ unsigned int CTF2BuiltinVote::GetApproxMemUsage()
 	return sizeof(CTF2BuiltinVote) + GetBaseMemUsage();
 }
 
-bool CTF2BuiltinVote::UpdateVoteCounts(unsigned int items, CVector<unsigned int> votes, unsigned int totalClients)
+bool CTF2BuiltinVote::UpdateVoteCounts(unsigned int items, std::vector<unsigned int>& votes, unsigned int totalClients)
 {
 	return false;
 }

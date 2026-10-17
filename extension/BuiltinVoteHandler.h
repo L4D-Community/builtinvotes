@@ -33,20 +33,13 @@
 #define _INCLUDE_BUILTINVOTEHANDLER_H
 
 #include <IBuiltinVoteManager.h>
-#include <sh_vector.h>
+#include <vector>
 #include "convar.h"
 #include "smsdk_ext.h"
 #include "icvar.h"
 
 class BuiltinVoteManager;
 
-// We used to need these because we cannot access smsdk_ext directly
-// #include <ITranslator.h>
-// #include <IPlayerHelpers.h>
-// #include <IGameHelpers.h>
-// #include <ITimerSystem.h>
-
-using namespace SourceHook;
 using namespace SourceMod;
 
 class RedrawTimer :
@@ -117,7 +110,7 @@ private:
 	unsigned int m_Clients;
 	unsigned int m_TotalClients;
 	unsigned int m_Items;
-	CVector<unsigned int> m_Votes;
+	std::vector<unsigned int> m_Votes;
 	IBaseBuiltinVote *m_pCurVote;
 	bool m_bStarted;
 	bool m_bCancelled;

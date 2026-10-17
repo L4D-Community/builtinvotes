@@ -90,7 +90,7 @@ public: //IBaseBuiltinVote
 	void OnClientCommand(edict_t *pEntity, const CCommand &cmd);
 	virtual bool Display(int clients[], unsigned int num_clients) =0;
 	virtual unsigned int GetApproxMemUsage() =0;
-	virtual bool UpdateVoteCounts(unsigned int items, CVector<unsigned int> votes, unsigned int totalClients);
+	virtual bool UpdateVoteCounts(unsigned int items, std::vector<unsigned int>& votes, unsigned int totalClients);
 public: // CBaseBuiltinVote
 	virtual void Cancel_Finally() =0;
 	virtual void DisplayVotePass(const char *winner="") =0;

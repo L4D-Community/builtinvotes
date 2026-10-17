@@ -62,7 +62,7 @@ void VoteNativeHelpers::OnUnload()
 	while (!m_FreeVoteHandlers.empty())
 	{
 		delete m_FreeVoteHandlers.front();
-		m_FreeVoteHandlers.pop();
+		m_FreeVoteHandlers.pop_front();
 	}
 }
 
@@ -77,7 +77,7 @@ CBuiltinVoteHandler *VoteNativeHelpers::GetVoteHandler(IPluginFunction *pFunctio
 	}
 
 	handler = m_FreeVoteHandlers.front();
-	m_FreeVoteHandlers.pop();
+	m_FreeVoteHandlers.pop_front();
 
 	handler->Init(pFunction, flags, pPlName, hPlugin);
 	return handler;
@@ -85,7 +85,7 @@ CBuiltinVoteHandler *VoteNativeHelpers::GetVoteHandler(IPluginFunction *pFunctio
 
 void VoteNativeHelpers::FreeVoteHandler(CBuiltinVoteHandler *handler)
 {
-	m_FreeVoteHandlers.push(handler);
+	m_FreeVoteHandlers.push_back(handler);
 }
 
 /**
@@ -506,6 +506,8 @@ cell_t CreateBuiltinVote(IPluginContext *pContext, const cell_t *params)
 	// or the game doesn't support this type of voting, variable 'vote' will be set to NULL and we'll get a server crash.
 	if (vote == NULL)
 	{
+		g_VoteHelpers.FreeVoteHandler(handler);
+
 		if (addr)
 		{
 			*addr = (cell_t)eInvalidParamBuiltinVoteType;

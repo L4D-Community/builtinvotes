@@ -34,13 +34,12 @@
 
 #include <IBuiltinVoteManager.h>
 #include <IPlayerHelpers.h>
-#include <sh_string.h>
-#include <sh_vector.h>
+#include <string>
+#include <vector>
 #include "extension.h"
-#include "sm_memtable.h"
+#include "sm_memtable.h" // Sourcemod class
 
 using namespace SourceMod;
-using namespace SourceHook;
 
 class CItem
 {
@@ -160,10 +159,10 @@ protected:
 private:
 	void InternalDelete();
 protected:
-	String m_Argument;
+	std::string m_Argument;
 	IBuiltinVoteStyle *m_pStyle;
 	BaseStringTable m_Strings;
-	CVector<CItem> m_items;
+	std::vector<CItem> m_items;
 	bool m_bShouldDelete;
 	bool m_bCancelling;
 	IdentityToken_t *m_pOwner;

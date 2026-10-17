@@ -237,9 +237,9 @@ bool BaseBuiltinVoteStyle::DoClientVote(int clients[], unsigned int num_clients,
 		vote->Display(realClients, totalPlayers);
 		//SendDisplay(realClients, totalPlayers, vote);
 		return true;
-	} else {
-		return false;
 	}
+
+	return false;
 }
 
 bool BaseBuiltinVoteStyle::RedoClientVote(int client)
@@ -299,51 +299,73 @@ Handle_t CBaseBuiltinVote::GetHandle()
 
 bool CBaseBuiltinVote::AppendItem(const char *info, const char *display)
 {
-	if ((m_voteType != BuiltinVoteType_Custom_Mult && m_voteType != BuiltinVoteType_NextLevelMult) || m_items.size() >= m_pStyle->GetMaxItems())
+	if (m_voteType != BuiltinVoteType_Custom_Mult && m_voteType != BuiltinVoteType_NextLevelMult)
+	{
+		return false;
+	}
+
+	if (m_items.size() >= m_pStyle->GetMaxItems())
 	{
 		return false;
 	}
 
 	CItem item;
-
 	item.infoString = m_Strings.AddString(info);
+
 	if (display)
 	{
 		item.displayString = m_Strings.AddString(display);
 	}
-	m_items.push_back(item);
 
+	m_items.push_back(item);
 	return true;
 }
 
 bool CBaseBuiltinVote::InsertItem(unsigned int position, const char *info, const char *display)
 {
-	if ((m_voteType != BuiltinVoteType_Custom_Mult && m_voteType != BuiltinVoteType_NextLevelMult) || m_items.size() >= m_pStyle->GetMaxItems())
+	if (m_voteType != BuiltinVoteType_Custom_Mult && m_voteType != BuiltinVoteType_NextLevelMult)
+	{
+		return false;
+	}
+
+	if (m_items.size() >= m_pStyle->GetMaxItems())
+	{
+		return false;
+	}
+
+	if (position > m_items.size())
 	{
 		return false;
 	}
 
 	CItem item;
-
 	item.infoString = m_Strings.AddString(info);
+
 	if (display)
 	{
 		item.displayString = m_Strings.AddString(display);
 	}
-	CVector<CItem>::iterator iter = m_items.iterAt(position);
-	m_items.insert(iter, item);
+
+	auto arrIndex = m_items.begin() + position;
+	m_items.insert(arrIndex, item);
 
 	return true;
 }
 
 bool CBaseBuiltinVote::RemoveItem(unsigned int position)
 {
-	if ((m_voteType != BuiltinVoteType_Custom_Mult && m_voteType != BuiltinVoteType_NextLevelMult) || position >= m_items.size())
+	if (m_voteType != BuiltinVoteType_Custom_Mult && m_voteType != BuiltinVoteType_NextLevelMult)
 	{
 		return false;
 	}
 
-	m_items.erase(m_items.iterAt(position));
+	if (position >= m_items.size())
+	{
+		return false;
+	}
+
+	auto arrIndex = m_items.begin() + position;
+	m_items.erase(arrIndex);
 
 	if (m_items.size() == 0)
 	{
@@ -396,7 +418,7 @@ IBuiltinVoteStyle *CBaseBuiltinVote::GetDrawStyle()
 
 void CBaseBuiltinVote::SetArgument(const char *message)
 {
-	m_Argument.assign(message);
+	m_Argument.assign( (message) ? message : "");
 }
 
 const char *CBaseBuiltinVote::GetArgument()
@@ -477,7 +499,6 @@ void CBaseBuiltinVote::InternalDelete()
 	}
 
 	m_pHandler->OnVoteDestroy(this);
-
 	delete this;
 }
 
@@ -498,9 +519,9 @@ IBuiltinVoteHandler *CBaseBuiltinVote::GetHandler()
 
 unsigned int CBaseBuiltinVote::GetBaseMemUsage()
 {
-	return m_Argument.size()
+	return static_cast<unsigned int>(m_Argument.capacity())
 		+ m_Strings.GetMemTable()->GetMemUsage()
-		+ (m_items.size() * sizeof(CItem));
+		+ static_cast<unsigned int>(m_items.capacity() * sizeof(CItem));
 }
 
 BuiltinVoteType CBaseBuiltinVote::GetVoteType()

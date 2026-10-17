@@ -33,7 +33,7 @@
 #define _INCLUDE_SOURCEMOD_NATIVES_PROPER_H_
 
 #include "extension.h"
-#include <sh_stack.h>
+#include <deque>
 
 #define BV_DATA_HNDL_CLOSE (1 << 0)
 
@@ -63,7 +63,7 @@ public:
 	CBuiltinVoteHandler *GetVoteHandler(IPluginFunction *pFunction, int flags, const char *pPlName, Handle_t hPlugin);
 	void FreeVoteHandler(CBuiltinVoteHandler *handler);
 private:
-	CStack<CBuiltinVoteHandler *> m_FreeVoteHandlers;
+	std::deque<CBuiltinVoteHandler *> m_FreeVoteHandlers;
 };
 
 class CBuiltinVoteHandler : public IBuiltinVoteHandler

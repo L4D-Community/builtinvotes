@@ -44,7 +44,7 @@ CBaseBuiltinVote(pHandler, pStyle, type, pOwner)
 {
 }
 
-bool CL4DBaseBuiltinVote::UpdateVoteCounts(unsigned int items, CVector<unsigned int> votes, unsigned int totalClients)
+bool CL4DBaseBuiltinVote::UpdateVoteCounts(unsigned int items, std::vector<unsigned int>& votes, unsigned int totalClients)
 {
 	IGameEvent* changeEvent = events->CreateEvent("vote_changed");
 	if (changeEvent != NULL) {

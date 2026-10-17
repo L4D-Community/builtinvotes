@@ -34,7 +34,7 @@
 
 #include <IShareSys.h>
 #include <IHandleSys.h>
-#include <sh_vector.h>
+#include <vector>
 
 #define SMINTERFACE_BUILTINVOTES_NAME		"IBuiltinVoteManager"
 #define SMINTERFACE_BUILTINVOTES_VERSION	1
@@ -45,8 +45,6 @@
 #define BUILTINVOTES_VOTE_YES				1
 
 //#define MAX_TRANSLATE_PARAMS				32
-
-using namespace SourceHook;
 
 namespace SourceMod
 {
@@ -466,7 +464,7 @@ namespace SourceMod
 		 * @param totalClients	Number of clients in vote
 		 * @return				true if supported by game, false if not
 		 */
-		virtual bool UpdateVoteCounts(unsigned int items, CVector<unsigned int> votes, unsigned int totalClients) =0;
+		virtual bool UpdateVoteCounts(unsigned int items, std::vector<unsigned int>& votes, unsigned int totalClients) =0;
 
 		/**
 		 * @brief Returns the vote's handler.
