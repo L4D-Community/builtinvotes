@@ -69,8 +69,11 @@ private:
 class CBuiltinVoteHandler : public IBuiltinVoteHandler
 {
 	friend class VoteNativeHelpers;
+
 public:
-	CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char* sPlName = nullptr, Handle_t hPlugin = BAD_HANDLE);
+	CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char* psPlName = NULL, Handle_t hPlugin = BAD_HANDLE);
+	void Init(IPluginFunction* pBasic, int flags, const char* psPlName = NULL, Handle_t hPlugin = BAD_HANDLE);
+
 public:
 	void OnVoteStart(IBaseBuiltinVote *vote);
 	//void OnVoteDisplay(IBaseBuiltinVote *vote, int client);
@@ -86,8 +89,10 @@ public:
 
 	Handle_t GetBuiltinVotePluginHandle();
 	const char* GetBuiltinVotePluginName();
+
 private:
 	cell_t DoAction(IBaseBuiltinVote *vote, BuiltinVoteAction action, cell_t param1, cell_t param2, cell_t def_res=0);
+
 private:
 	IPluginFunction *m_pBasic;
 	Handle_t m_hPlugin;

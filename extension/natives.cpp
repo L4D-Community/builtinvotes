@@ -77,14 +77,9 @@ CBuiltinVoteHandler *VoteNativeHelpers::GetVoteHandler(IPluginFunction *pFunctio
 	}
 
 	handler = m_FreeVoteHandlers.front();
-
 	m_FreeVoteHandlers.pop();
 
-	handler->m_pBasic = pFunction;
-	handler->m_Flags = flags;
-	handler->m_pVoteResults = NULL;
-	strncpy(handler->m_sPluginName, pPlName, sizeof(handler->m_sPluginName));
-
+	handler->Init(pFunction, flags, pPlName, hPlugin);
 	return handler;
 }
 
@@ -96,19 +91,27 @@ void VoteNativeHelpers::FreeVoteHandler(CBuiltinVoteHandler *handler)
 /**
  * VOTE HANDLER WRAPPER
  */
-CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char *pPlName, Handle_t hPlugin) :
-	m_pBasic(pBasic),
-	m_hPlugin(hPlugin),
-	m_Flags(flags),
-	m_pVoteResults(NULL),
-	m_hVoteResultsPlugin(BAD_HANDLE),
-	m_fnVoteResult(0),
-	m_iUserData(0),
-	m_iUserDataFlags(0),
-	m_pOwner(NULL)
+CBuiltinVoteHandler::CBuiltinVoteHandler(IPluginFunction *pBasic, int flags, const char * psPlName, Handle_t hPlugin)
 {
-	strncpy(m_sPluginName, pPlName, sizeof(m_sPluginName));
+	Init(pBasic, flags, psPlName, hPlugin);
 }
+
+void CBuiltinVoteHandler::Init(IPluginFunction* pBasic, int flags, const char* psPlName, Handle_t hPlugin)
+{
+	m_pBasic = pBasic;
+	m_hPlugin = hPlugin;
+	m_Flags = flags;
+	m_pVoteResults = NULL;
+	m_hVoteResultsPlugin = BAD_HANDLE;
+	m_fnVoteResult = 0;
+	m_iUserData = 0;
+	m_iUserDataFlags = 0;
+	m_pOwner = NULL;
+
+	strncpy(m_sPluginName, psPlName, sizeof(m_sPluginName) - 1);
+	m_sPluginName[sizeof(m_sPluginName) - 1] = '\0';
+}
+
 /*
 void CBuiltinVoteHandler::OnVoteStart(IBaseBuiltinVote *vote)
 {
