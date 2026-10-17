@@ -83,7 +83,7 @@ jobs:
           
       - name: Add msbuild to PATH (Windows)
         if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
         
       - name: Install (Windows)
         if: runner.os == 'Windows'
@@ -100,7 +100,7 @@ jobs:
           )
           
       - name: Getting SourceMod ${{ matrix.sm_version }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: alliedmodders/sourcemod
           ref: ${{ matrix.sm_branch }}
@@ -108,7 +108,7 @@ jobs:
           submodules: recursive
           
       - name: Getting MM:Source ${{ matrix.meta_version }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: alliedmodders/metamod-source
           ref: ${{ matrix.meta_branch }}
@@ -116,13 +116,13 @@ jobs:
           submodules: recursive
 
       - name: Getting AMBuild
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: alliedmodders/ambuild
           path: ambuild
           
       - name: Setting up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.x'
           
@@ -132,28 +132,28 @@ jobs:
           pip install git+https://github.com/alliedmodders/ambuild
           
       - name: Getting hl2sdk-l4d2
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: alliedmodders/hl2sdk
           ref: l4d2
           path: hl2sdk-l4d2
           
       - name: Getting hl2sdk-l4d
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: alliedmodders/hl2sdk
           ref: l4d
           path: hl2sdk-l4d
           
       - name: Getting hl2sdk-tf2
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: alliedmodders/hl2sdk
           ref: tf2
           path: hl2sdk-tf2
           
       - name: Getting own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: src
           
@@ -171,7 +171,7 @@ jobs:
           ambuild
            
       - name: Uploading package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.event.repository.name }}-sm${{ matrix.sm_version }}-${{ matrix.os_short }}-${{ env.GITHUB_SHA_SHORT }}
           path: src/build/package
