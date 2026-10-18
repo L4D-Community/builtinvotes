@@ -198,6 +198,8 @@ void BuiltinVoteHandler::OnLoad()
 
 void BuiltinVoteHandler::OnUnload()
 {
+	sm_vote_delay->RemoveChangeCallback(OnVoteDelayChange);
+
 	playerhelpers->RemoveClientListener(this);
 }
 
@@ -266,6 +268,8 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 
 		if (iPlRetValue > Pl_Continue)
 		{
+			Handle_t voteHandle = m_hVoteHandle;
+
 			InternalReset();
 
 			// Tell the plugin that voting is over so that it clears the descriptors
@@ -275,7 +279,7 @@ bool BuiltinVoteHandler::StartVote(IBaseBuiltinVote *vote,
 			// Let's try to get a pointer to class 'IBaseBuiltinVote' again, 
 			// maybe we already deleted it in function 'OnHandleDestroy', or the plugin called the 'delete' or 'CloseHandle' method, 
 			// if we try to delete it again, we'll get a crash.
-			if (g_BuiltinVotes.ReadVoteHandle(m_hVoteHandle, &vote) == HandleError_None)
+			if (g_BuiltinVotes.ReadVoteHandle(voteHandle, &vote) == HandleError_None)
 			{
 				vote->Destroy(true);
 			}
