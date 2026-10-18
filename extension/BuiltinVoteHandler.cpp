@@ -198,7 +198,7 @@ void BuiltinVoteHandler::OnLoad()
 
 void BuiltinVoteHandler::OnUnload()
 {
-	sm_vote_delay->RemoveChangeCallback(OnVoteDelayChange);
+	//sm_vote_delay->InstallChangeCallback(NULL);
 
 	playerhelpers->RemoveClientListener(this);
 }
